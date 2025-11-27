@@ -46,4 +46,19 @@ export const frames: FrameMeta[] = [
     aspectSupport: ['16:9', '1:1', '9:16'],
     // No precise screenRect provided; use default fallback (0.1,0.1,0.8,0.8)
   },
+  // 複数デバイステスト用のサンプル
+  {
+    id: 'sp-and-laptop-9x16',
+    name: 'スマホ + ノートPC (9:16)',
+    category: 'laptop',
+    frameImage: '/assets/mockup/9x16/SpAndLaptop_9x16_028_brown.webp',
+    aspectSupport: ['9:16'],
+  },
+  {
+    id: '2sp-and-laptop-16x9',
+    name: '2スマホ + ノートPC (16:9)',
+    category: 'laptop',
+    frameImage: '/assets/mockup/16x9/2SpAndLaptop_16x9_037_blue.webp',
+    aspectSupport: ['16:9'],
+  },
 ];

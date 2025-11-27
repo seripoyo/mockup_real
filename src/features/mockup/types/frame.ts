@@ -1,5 +1,6 @@
 export type DeviceCategory = 'smartphone' | 'tablet' | 'laptop' | 'desktop';
-export type AspectRatio = '9:16' | '16:9' | '1:1';
+export type AspectRatio = '9:16' | '16:9' | '1:1' | '4:5' | '3:4' | '8:9';
+export type DeviceIndex = 0 | 1 | 2;
 
 export interface ScreenRectPct {
   xPct: number; // 0..1 left offset relative to frame width
@@ -12,6 +13,22 @@ export interface ScreenRegion {
   id: string;
   name: string;
   rect: ScreenRectPct;
+  deviceIndex?: DeviceIndex;
+  fillColor?: string;
+}
+
+// 各デバイス領域の状態
+export interface DeviceRegionState {
+  deviceIndex: DeviceIndex;
+  rect: ScreenRectPct | null;
+  maskDataUrl: string | null;
+  hardMaskUrl: string | null;
+  darkOverlayUrl: string | null;
+  compositeUrl: string | null;
+  imageUrl: string | null;
+  imageNatural: { w: number; h: number } | null;
+  fillColor: string;
+  isActive: boolean;
 }
 
 export interface FrameMeta {

@@ -1,4 +1,4 @@
-import MinimalMockup from "./features/mockup/components/MinimalMockup";
+import MultiDeviceMockup from "./features/mockup/components/MultiDeviceMockup";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
@@ -12,14 +12,14 @@ function App() {
       <div className="z-10 w-full">
         <div className="text-center max-w-4xl mx-auto px-6 py-8">
           <h1 className="text-black font-normal leading-tight text-center mb-4 text-3xl sm:text-4xl lg:text-5xl">
-            モックアップ生成（最小版）
+            モックアップ生成（複数デバイス対応版）
           </h1>
           <p className="text-black/80 leading-relaxed text-center max-w-2xl mx-auto text-sm sm:text-base">
-            フレーム選択・画像アップロード・プレビューを試せます
+            複数のデバイスを同時に塗りつぶし、個別に画像をアップロードできます
           </p>
         </div>
         <ErrorBoundary>
-          <MinimalMockup />
+          <MultiDeviceMockup />
         </ErrorBoundary>
       </div>
     </main>
