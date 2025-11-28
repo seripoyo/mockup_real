@@ -1,9 +1,22 @@
 import React, { useMemo, useState, useEffect, useLayoutEffect, useRef } from 'react';
-import type { AspectRatio, FrameMeta, ScreenRectPct, DeviceIndex, DeviceRegionState } from '../types/frame';
+import type { AspectRatio, FrameMeta, ScreenRectPct, DeviceIndex, DeviceRegionState, Point } from '../types/frame';
 import { frames } from '../data/frames';
 import { containSize, coverSize } from '../utils/fit';
 import { DEVICE_COLOR_ORDER, getDeviceColor } from '../../../constants/deviceColors';
 import DebugButton from '../../../components/DebugButton';
+import {
+  getOrientation,
+  getDeviceAngle,
+  isOrientationMatched,
+  getCornerRadius,
+  generateDeviceDebugInfo,
+  type DeviceDebugInfo
+} from '../utils/deviceOrientation';
+import {
+  logCoordinateTransform,
+  checkMaskContentAlignment,
+  generateDebugReport
+} from '../utils/debugVisualization';
 
 function aspectToCss(aspect: AspectRatio) {
   switch (aspect) {
@@ -55,7 +68,8 @@ function findNearestWhite(x: number, y: number, data: Uint8ClampedArray, w: numb
 export default function MultiDeviceMockup() {
   const [selectedFrame, setSelectedFrame] = useState<FrameMeta | null>(null);
   const [aspect, setAspect] = useState<AspectRatio>('9:16');
-  const [fitMode, setFitMode] = useState<'contain' | 'cover'>('cover');
+  // Coverモードのみを使用
+  const fitMode = 'cover' as const;
   const [showOverlay, setShowOverlay] = useState<boolean>(false);
   const [frameNatural, setFrameNatural] = useState<{ w: number; h: number } | null>(null);
   const [containerSize, setContainerSize] = useState<{ w: number; h: number }>({ w: 800, h: 800 });
@@ -63,6 +77,7 @@ export default function MultiDeviceMockup() {
   const [feather, setFeather] = useState<number>(2);
   const [editedFrameUrl, setEditedFrameUrl] = useState<string | null>(null);
   const [isEditingFrame, setIsEditingFrame] = useState<boolean>(false);
+  const [debugMode, setDebugMode] = useState<boolean>(false);
 
   // 複数デバイス対応の状態管理
   const [deviceRegions, setDeviceRegions] = useState<DeviceRegionState[]>([]);
@@ -72,6 +87,7 @@ export default function MultiDeviceMockup() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const debugLogRef = useRef<string[]>([]);
+  const deviceDebugInfoRef = useRef<DeviceDebugInfo[]>([]);
 
   const frameUrl = useMemo(() => (selectedFrame ? (editedFrameUrl ?? selectedFrame.frameImage) : null), [selectedFrame, editedFrameUrl]);
 
@@ -88,6 +104,7 @@ export default function MultiDeviceMockup() {
       newRegions.push({
         deviceIndex: i as DeviceIndex,
         rect: null,
+        corners: null,  // 4隅座標を初期化
         maskDataUrl: null,
         hardMaskUrl: null,
         darkOverlayUrl: null,
@@ -122,6 +139,43 @@ export default function MultiDeviceMockup() {
       });
     };
   }, [imageUrls]);
+
+  // フレーム切り替え時に画像とエリア判定をクリア
+  useEffect(() => {
+    // 初回レンダリング時はスキップ
+    if (!selectedFrame) return;
+
+    // すべてのデータをリセット（エリア判定も含む）
+    setDeviceRegions(prev => prev.map(region => ({
+      ...region,
+      rect: null,           // エリア判定もクリア
+      corners: null,        // 4隅座標もクリア
+      maskDataUrl: null,
+      hardMaskUrl: null,
+      darkOverlayUrl: null,
+      compositeUrl: null,
+      imageUrl: null,
+      imageNatural: null,
+      isActive: false,      // アクティブ状態もリセット
+    })));
+
+    // 画像URLsもクリア
+    setImageUrls([null, null, null]);
+
+    // マスクデータもクリア
+    lastMasksRef.current.clear();
+
+    // オーバーレイキャンバスもクリア
+    const overlay = overlayCanvasRef.current;
+    if (overlay) {
+      const ctx = overlay.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, overlay.width, overlay.height);
+      }
+    }
+
+    debugLogRef.current.push('frame-changed-all-cleared');
+  }, [selectedFrame]);
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>, deviceIndex: DeviceIndex) => {
     const file = e.target.files?.[0];
@@ -179,6 +233,7 @@ export default function MultiDeviceMockup() {
       setDeviceRegions(prev => prev.map(region => ({
         ...region,
         rect: null,
+        corners: null,  // 4隅座標もクリア
         maskDataUrl: null,
         hardMaskUrl: null,
         darkOverlayUrl: null,
@@ -358,6 +413,14 @@ export default function MultiDeviceMockup() {
     const rw = Math.max(1, maxX - minX + 1);
     const rh = Math.max(1, maxY - minY + 1);
 
+    // 検出領域の4隅座標を取得（左上、右上、右下、左下）
+    const corners: [Point, Point, Point, Point] = [
+      { x: rx, y: ry },           // 左上
+      { x: rx + rw, y: ry },      // 右上
+      { x: rx + rw, y: ry + rh }, // 右下
+      { x: rx, y: ry + rh }       // 左下
+    ];
+
     // マスク生成
     const baseMask = new Uint8Array(rw * rh);
     for (let j = 0; j < rh; j++) {
@@ -464,7 +527,7 @@ export default function MultiDeviceMockup() {
 
     setDeviceRegions(prev => prev.map((region, idx) =>
       idx === deviceIndex
-        ? { ...region, rect: newRect, maskDataUrl: mUrl, hardMaskUrl: hUrl, darkOverlayUrl: darkUrl, isActive: true }
+        ? { ...region, rect: newRect, corners, maskDataUrl: mUrl, hardMaskUrl: hUrl, darkOverlayUrl: darkUrl, isActive: true }
         : region
     ));
     setActiveDeviceIndex(deviceIndex);
@@ -474,35 +537,51 @@ export default function MultiDeviceMockup() {
   };
 
   const clearOverlay = () => {
-    const overlay = overlayCanvasRef.current;
-    if (!overlay) return;
-    const ctx = overlay.getContext('2d');
-    if (!ctx) return;
-    ctx.clearRect(0, 0, overlay.width, overlay.height);
-
+    // 画像とコンポジットのみをクリア、エリア判定（rect）とオーバーレイ表示は残す
     setDeviceRegions(prev => prev.map(region => ({
       ...region,
-      rect: null,
-      maskDataUrl: null,
-      hardMaskUrl: null,
-      darkOverlayUrl: null,
-      compositeUrl: null,
-      isActive: false,
+      // rect は残す（エリア判定を保持）
+      // maskDataUrl も残す（塗りつぶしエリアを保持）
+      // hardMaskUrl も残す
+      // darkOverlayUrl も残す
+      compositeUrl: null,  // 合成画像のみクリア
+      imageUrl: null,      // アップロード画像のみクリア
+      imageNatural: null,  // 画像サイズ情報のみクリア
+      // isActive は保持
     })));
-    lastMasksRef.current.clear();
-    setActiveDeviceIndex(null);
-    debugLogRef.current.push('all-overlays-cleared');
+
+    // 画像URLsもクリア
+    setImageUrls([null, null, null]);
+
+    // オーバーレイの表示は維持（再描画）
+    drawMaskIntoOverlay();
+
+    debugLogRef.current.push('images-cleared-keeping-detection');
   };
 
   const clearDevice = (deviceIndex: DeviceIndex) => {
-    lastMasksRef.current.delete(deviceIndex);
+    // 画像のみクリア、エリア判定は保持
     setDeviceRegions(prev => prev.map((region, idx) =>
       idx === deviceIndex
-        ? { ...region, rect: null, maskDataUrl: null, hardMaskUrl: null, darkOverlayUrl: null, compositeUrl: null, isActive: false }
+        ? {
+            ...region,
+            // rect, maskDataUrl, hardMaskUrl, darkOverlayUrl, isActive は保持
+            compositeUrl: null,   // 合成画像のみクリア
+            imageUrl: null,       // アップロード画像のみクリア
+            imageNatural: null    // 画像サイズ情報のみクリア
+          }
         : region
     ));
+
+    // 該当デバイスの画像URLもクリア
+    setImageUrls(prev => {
+      const newUrls = [...prev];
+      newUrls[deviceIndex] = null;
+      return newUrls;
+    });
+
     drawMaskIntoOverlay();
-    debugLogRef.current.push(`device-${deviceIndex}-cleared`);
+    debugLogRef.current.push(`device-${deviceIndex}-image-cleared`);
   };
 
   // Re-generate masks when feather changes
@@ -524,11 +603,20 @@ export default function MultiDeviceMockup() {
 
   // Composite images for each device
   useEffect(() => {
+    // デバイスが存在しない場合は早期リターン
+    if (deviceRegions.length === 0) return;
+
+    let isCancelled = false;
+
+    // 実際に存在するデバイスのみを処理
     deviceRegions.forEach((region, deviceIndex) => {
+      if (!region) return;
+
       (async () => {
+        if (isCancelled) return;
         const last = lastMasksRef.current.get(deviceIndex as DeviceIndex);
         const imageUrl = imageUrls[deviceIndex];
-        if (!last || !region.hardMaskUrl || !imageUrl || !region.imageNatural) {
+        if (!last || !region.hardMaskUrl || !imageUrl || !region.imageNatural || !region.rect) {
           if (region.compositeUrl) {
             setDeviceRegions(prev => prev.map((r, idx) =>
               idx === deviceIndex ? { ...r, compositeUrl: null } : r
@@ -538,8 +626,27 @@ export default function MultiDeviceMockup() {
         }
 
         const { rw, rh } = last;
+
+        // 表示用のサイズを計算
+        let canvasWidth = rw;
+        let canvasHeight = rh;
+
+        // frameNaturalが存在する場合、表示サイズに合わせて調整
+        if (frameNatural && containerSize) {
+          const scale = Math.min(
+            containerSize.w / frameNatural.w,
+            containerSize.h / frameNatural.h
+          );
+          const displayWidth = frameNatural.w * scale;
+          const displayHeight = frameNatural.h * scale;
+
+          canvasWidth = Math.round(region.rect.wPct * displayWidth);
+          canvasHeight = Math.round(region.rect.hPct * displayHeight);
+        }
+
         const comp = document.createElement('canvas');
-        comp.width = rw; comp.height = rh;
+        comp.width = canvasWidth;
+        comp.height = canvasHeight;
         const cctx = comp.getContext('2d');
         if (!cctx) return;
 
@@ -554,25 +661,204 @@ export default function MultiDeviceMockup() {
           im.src = region.hardMaskUrl!;
         });
 
-        let fitRect;
-        if (fitMode === 'cover') {
-          fitRect = coverSize(rw, rh, region.imageNatural.w, region.imageNatural.h);
-        } else {
-          fitRect = containSize(rw, rh, region.imageNatural.w, region.imageNatural.h);
-        }
-        cctx.drawImage(up, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
 
+        // デバッグ情報を生成
+        const debugInfo = generateDeviceDebugInfo(
+          selectedFrame?.name || 'unknown',
+          deviceIndex,
+          region.rect,
+          containerSize,
+          region.imageNatural,
+          selectedFrame?.category,
+          'cover' // coverモードのみ使用
+        );
+
+        // 座標変換の詳細ログを出力
+        if (frameNatural) {
+          logCoordinateTransform(
+            deviceIndex,
+            frameNatural,
+            containerSize,
+            region.rect,
+            { x: 0, y: 0, width: canvasWidth, height: canvasHeight } // 修正された実際の座標
+          );
+        }
+
+        // 画像と検出領域の向きを判定（canvasのサイズを使用）
+        const needsRotation = !isOrientationMatched(
+          up.width,
+          up.height,
+          canvasWidth,
+          canvasHeight
+        );
+
+        // 詳細なデバッグログ出力（デバッグモードがONの時のみ）
+        if (debugMode) {
+          console.log(`=== Device ${deviceIndex} Debug Info ===`);
+          console.log('Frame:', debugInfo.frameName);
+          console.log('Device Angle:', debugInfo.deviceAngle, '°');
+          console.log('Region Size:', debugInfo.regionSize);
+          console.log('Region Orientation:', debugInfo.regionOrientation);
+          console.log('Corner Radius:', debugInfo.cornerRadius, 'px');
+          console.log('Image Size:', { w: up.width, h: up.height });
+          console.log('Image Orientation:', getOrientation(up.width, up.height));
+          console.log('Orientation Matched:', !needsRotation);
+          console.log('Needs Rotation:', needsRotation);
+          console.log('Fit Mode:', 'cover');
+          console.log('Original Mask Size:', { w: rw, h: rh });
+          console.log('Canvas Size:', { w: canvasWidth, h: canvasHeight });
+          console.log('Composite Canvas Size:', { w: comp.width, h: comp.height });
+        }
+
+        // 実際の領域パーセンテージと期待される座標
+        if (frameNatural && region.rect) {
+          const scale = Math.min(
+            containerSize.w / frameNatural.w,
+            containerSize.h / frameNatural.h
+          );
+          const displayWidth = frameNatural.w * scale;
+          const displayHeight = frameNatural.h * scale;
+          const offsetX = (containerSize.w - displayWidth) / 2;
+          const offsetY = (containerSize.h - displayHeight) / 2;
+
+          const expectedPixels = {
+            x: Math.round(offsetX + region.rect.xPct * displayWidth),
+            y: Math.round(offsetY + region.rect.yPct * displayHeight),
+            width: Math.round(region.rect.wPct * displayWidth),
+            height: Math.round(region.rect.hPct * displayHeight)
+          };
+
+          if (debugMode) {
+            console.log('Expected Pixel Coords:', expectedPixels);
+            console.log('Actual Canvas Size (rw, rh):', { width: rw, height: rh });
+
+            if (Math.abs(expectedPixels.width - rw) > 5 || Math.abs(expectedPixels.height - rh) > 5) {
+              console.error('🚨 SIZE MISMATCH DETECTED!');
+              console.error('Expected:', expectedPixels.width, 'x', expectedPixels.height);
+              console.error('Actual:', rw, 'x', rh);
+              console.error('This will cause the image to not fit properly in the designated area!');
+            }
+          }
+        }
+
+        // デバッグ情報を保存
+        deviceDebugInfoRef.current[deviceIndex] = debugInfo;
+        debugLogRef.current.push(`device-${deviceIndex}: ${JSON.stringify(debugInfo)}`);
+
+        let sourceImage: HTMLImageElement | HTMLCanvasElement = up;
+        let sourceWidth = up.width;
+        let sourceHeight = up.height;
+
+        // 必要に応じて画像を回転
+        if (needsRotation) {
+          const rotCanvas = document.createElement('canvas');
+          const rotCtx = rotCanvas.getContext('2d');
+          if (rotCtx) {
+            // 90度回転後のサイズ設定
+            rotCanvas.width = up.height;
+            rotCanvas.height = up.width;
+
+            // 中心を移動して回転
+            rotCtx.translate(rotCanvas.width / 2, rotCanvas.height / 2);
+            rotCtx.rotate(Math.PI / 2);
+            rotCtx.drawImage(up, -up.width / 2, -up.height / 2);
+
+            sourceImage = rotCanvas;
+            sourceWidth = rotCanvas.width;
+            sourceHeight = rotCanvas.height;
+
+            if (debugMode) {
+              console.log('Image rotated 90°, new size:', { w: sourceWidth, h: sourceHeight });
+            }
+          }
+        }
+
+        // 検出領域に画像をフィット（coverモードのみ使用）
+        const fitRect = coverSize(canvasWidth, canvasHeight, sourceWidth, sourceHeight);
+
+        if (debugMode) {
+          console.log('Fit Result:', {
+            mode: 'cover',
+            originalMaskSize: { rw, rh },
+            canvasSize: { w: canvasWidth, h: canvasHeight },
+            sourceSize: { w: sourceWidth, h: sourceHeight },
+            fitRect
+          });
+        }
+
+        // 画像を描画
+        cctx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+
+        // マスクで切り抜き（マスクを適切なサイズにスケール）
         cctx.globalCompositeOperation = 'destination-in';
-        cctx.drawImage(mk, 0, 0, rw, rh);
+        cctx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
+
+        // 角丸を適用（canvasサイズに基づいて計算）
+        const cornerRadius = getCornerRadius(canvasWidth, canvasHeight, selectedFrame?.category);
+        if (cornerRadius > 0) {
+          if (debugMode) {
+            console.log('Applying corner radius:', cornerRadius, 'px');
+          }
+
+          cctx.globalCompositeOperation = 'destination-in';
+          cctx.beginPath();
+
+          // 角丸パスを作成（canvasサイズを使用）
+          cctx.moveTo(cornerRadius, 0);
+          cctx.lineTo(canvasWidth - cornerRadius, 0);
+          cctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, cornerRadius);
+          cctx.lineTo(canvasWidth, canvasHeight - cornerRadius);
+          cctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - cornerRadius, canvasHeight);
+          cctx.lineTo(cornerRadius, canvasHeight);
+          cctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - cornerRadius);
+          cctx.lineTo(0, cornerRadius);
+          cctx.quadraticCurveTo(0, 0, cornerRadius, 0);
+          cctx.closePath();
+
+          cctx.fillStyle = '#ffffff';
+          cctx.fill();
+        }
+
         cctx.globalCompositeOperation = 'source-over';
 
         const compositeUrl = comp.toDataURL('image/png');
-        setDeviceRegions(prev => prev.map((r, idx) =>
-          idx === deviceIndex ? { ...r, compositeUrl } : r
-        ));
+
+        // 表示位置情報を計算
+        let displayPosition = { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
+        if (frameNatural && region.rect) {
+          const scale = Math.min(
+            containerSize.w / frameNatural.w,
+            containerSize.h / frameNatural.h
+          );
+          const displayWidth = frameNatural.w * scale;
+          const displayHeight = frameNatural.h * scale;
+          const offsetX = (containerSize.w - displayWidth) / 2;
+          const offsetY = (containerSize.h - displayHeight) / 2;
+
+          displayPosition = {
+            x: Math.round(offsetX + region.rect.xPct * displayWidth),
+            y: Math.round(offsetY + region.rect.yPct * displayHeight),
+            width: canvasWidth,
+            height: canvasHeight
+          };
+        }
+
+        if (!isCancelled) {
+          setDeviceRegions(prev => prev.map((r, idx) =>
+            idx === deviceIndex ? { ...r, compositeUrl, displayPosition } : r
+          ));
+        }
+
+        if (debugMode && !isCancelled) {
+          console.log('===========================');
+        }
       })();
     });
-  }, [deviceRegions, imageUrls, fitMode]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [imageUrls, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, debugMode, deviceRegions, feather]);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
@@ -606,6 +892,23 @@ export default function MultiDeviceMockup() {
         ))}
       </div>
 
+      {/* Debug Mode Toggle */}
+      <div className="mt-2 flex items-center gap-2">
+        <button
+          onClick={() => setDebugMode(prev => !prev)}
+          className={`px-3 py-1 rounded text-sm font-medium ${
+            debugMode
+              ? 'bg-red-500 text-white'
+              : 'bg-gray-200 text-gray-700'
+          }`}
+        >
+          デバッグモード: {debugMode ? 'ON' : 'OFF'}
+        </button>
+        <span className="text-xs text-gray-500">
+          {debugMode ? 'コンソールにデバッグ情報を出力中' : 'クリックしてデバッグ情報を表示'}
+        </span>
+      </div>
+
       {/* Aspect & FitMode selector */}
       <div className="mt-4 flex items-center gap-2 flex-wrap">
         <span className="text-sm text-gray-600">アスペクト比:</span>
@@ -621,16 +924,6 @@ export default function MultiDeviceMockup() {
             {a}
           </button>
         ))}
-        <span className="ml-4 text-sm text-gray-600">フィット方式:</span>
-        {(['contain', 'cover'] as const).map((mode) => (
-          <button
-            key={mode}
-            onClick={() => setFitMode(mode)}
-            className={`px-2 py-1 text-sm border rounded ${fitMode === mode ? 'bg-black text-white' : 'bg-white hover:bg-gray-50'}`}
-          >
-            {mode}
-          </button>
-        ))}
       </div>
 
       {/* Control buttons */}
@@ -643,6 +936,12 @@ export default function MultiDeviceMockup() {
         <span className="ml-4 text-sm text-gray-600">マスクの滑らかさ:</span>
         <input type="range" min={0} max={10} step={1} value={feather} onChange={(e)=> setFeather(parseInt(e.target.value))} />
         <button onClick={clearOverlay} className="ml-2 px-2 py-1 text-sm border rounded bg-white hover:bg-gray-50">全クリア</button>
+
+        {/* Debug mode toggle */}
+        <label className="ml-4 flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={debugMode} onChange={(e) => setDebugMode(e.target.checked)} />
+          <span className="text-orange-600 font-medium">🔍 デバッグモード</span>
+        </label>
       </div>
 
       {/* Multiple image uploaders */}
@@ -747,27 +1046,51 @@ export default function MultiDeviceMockup() {
           )}
 
           {/* Composite results for each device */}
-          {selectedFrame && frameNatural && deviceRegions.map((region, idx) => {
-            if (!region.compositeUrl || !region.rect) return null;
-            const contain = containSize(containerSize.w, containerSize.h, frameNatural.w, frameNatural.h);
-            const sx = region.rect.xPct * contain.w + contain.left;
-            const sy = region.rect.yPct * contain.h + contain.top;
-            const sw = region.rect.wPct * contain.w;
-            const sh = region.rect.hPct * contain.h;
+          {selectedFrame && frameNatural && (() => {
+            // デバイスの奥行き順序を計算（Y座標とサイズに基づく）
+            const sortedRegions = deviceRegions
+              .map((region, idx) => ({ region, idx }))
+              .filter(item => item.region.compositeUrl && item.region.rect)
+              .sort((a, b) => {
+                // Y座標が小さい（上にある）デバイスを後ろに
+                const yDiff = (a.region.rect!.yPct - b.region.rect!.yPct) * 100;
+                if (Math.abs(yDiff) > 5) return yDiff;
 
-            return (
-              <div
-                key={idx}
-                style={{
-                  position: 'absolute',
-                  left: `${sx}px`,
-                  top: `${sy}px`,
-                  width: `${sw}px`,
-                  height: `${sh}px`,
-                  zIndex: 50 + idx,
-                  backgroundColor: 'transparent',
-                  pointerEvents: fillEnabled ? 'none' : 'auto',
-                }}
+                // Y座標が近い場合は面積が大きいものを後ろに
+                const areaA = a.region.rect!.wPct * a.region.rect!.hPct;
+                const areaB = b.region.rect!.wPct * b.region.rect!.hPct;
+                return areaB - areaA;
+              });
+
+            return sortedRegions.map(({ region, idx }, sortIndex) => {
+              // displayPositionが存在する場合はそれを使用、なければ従来の計算方法を使用
+              let sx, sy, sw, sh;
+              if (region.displayPosition) {
+                sx = region.displayPosition.x;
+                sy = region.displayPosition.y;
+                sw = region.displayPosition.width;
+                sh = region.displayPosition.height;
+              } else {
+                const contain = containSize(containerSize.w, containerSize.h, frameNatural.w, frameNatural.h);
+                sx = region.rect!.xPct * contain.w + contain.left;
+                sy = region.rect!.yPct * contain.h + contain.top;
+                sw = region.rect!.wPct * contain.w;
+                sh = region.rect!.hPct * contain.h;
+              }
+
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    position: 'absolute',
+                    left: `${sx}px`,
+                    top: `${sy}px`,
+                    width: `${sw}px`,
+                    height: `${sh}px`,
+                    zIndex: 50 + sortIndex,  // ソート順でz-indexを設定
+                    backgroundColor: 'transparent',
+                    pointerEvents: fillEnabled ? 'none' : 'auto',
+                  }}
               >
                 <img
                   key={imageKeys[idx]}
@@ -784,7 +1107,8 @@ export default function MultiDeviceMockup() {
                 )}
               </div>
             );
-          })}
+            });
+          })()}
 
           {/* No image hint */}
           {!imageUrls.some(Boolean) && (
@@ -795,6 +1119,32 @@ export default function MultiDeviceMockup() {
         </div>
       </div>
 
+      {/* Debug information display */}
+      {debugMode && (
+        <div className="mt-4 p-4 bg-orange-50 border border-orange-300 rounded-lg">
+          <h3 className="font-bold text-orange-800 mb-2">🔍 デバッグ情報</h3>
+          <div className="space-y-2 text-sm font-mono">
+            <div>Frame Natural: {frameNatural ? `${frameNatural.w}x${frameNatural.h}` : 'N/A'}</div>
+            <div>Container: {containerSize.w}x{containerSize.h}</div>
+            <div className="space-y-1">
+              {deviceRegions.map((region, idx) => region.rect && (
+                <div key={idx} className="pl-4 border-l-2 border-orange-300">
+                  <div className="font-semibold" style={{ color: region.fillColor }}>Device {idx}:</div>
+                  <div>Position: ({(region.rect.xPct * 100).toFixed(1)}%, {(region.rect.yPct * 100).toFixed(1)}%)</div>
+                  <div>Size: {(region.rect.wPct * 100).toFixed(1)}% × {(region.rect.hPct * 100).toFixed(1)}%</div>
+                  {region.imageNatural && (
+                    <div>Image: {region.imageNatural.w}x{region.imageNatural.h}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="text-orange-600 text-xs mt-2">
+              ⚠️ コンソールで詳細なデバッグ情報を確認してください
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Debug button */}
       <DebugButton
         label="デバッグレポート生成"
@@ -802,19 +1152,23 @@ export default function MultiDeviceMockup() {
           const data = {
             time: new Date().toISOString(),
             aspect,
-            fitMode,
+            fitMode: 'cover' as const,
             container: containerSize,
             frame: selectedFrame ? {
               id: selectedFrame.id,
               name: selectedFrame.name,
+              category: selectedFrame.category,
             } : null,
             frameNatural,
-            deviceRegions: deviceRegions.map(r => ({
+            deviceRegions: deviceRegions.map((r, idx) => ({
               deviceIndex: r.deviceIndex,
               rect: r.rect,
+              corners: r.corners,
               isActive: r.isActive,
               hasImage: !!r.imageUrl,
               fillColor: r.fillColor,
+              imageNatural: r.imageNatural,
+              debugInfo: deviceDebugInfoRef.current[idx] || null,
             })),
             activeDeviceIndex,
             logs: debugLogRef.current,
