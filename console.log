@@ -1,0 +1,1313 @@
+MultiDeviceMockup.tsx:269 Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+（匿名） @ MultiDeviceMockup.tsx:269この警告を分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+MultiDeviceMockup.tsx:853 ===========================
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+MultiDeviceMockup.tsx:697 === Device 1 Debug Info ===
+MultiDeviceMockup.tsx:698 Frame: スマホ + ノートPC (9:16)
+MultiDeviceMockup.tsx:699 Device Angle: 90 °
+MultiDeviceMockup.tsx:700 Region Size: Object
+MultiDeviceMockup.tsx:701 Region Orientation: landscape
+MultiDeviceMockup.tsx:702 Corner Radius: 7 px
+MultiDeviceMockup.tsx:703 Image Size: Object
+MultiDeviceMockup.tsx:704 Image Orientation: landscape
+MultiDeviceMockup.tsx:705 Orientation Matched: true
+MultiDeviceMockup.tsx:706 Needs Rotation: false
+MultiDeviceMockup.tsx:707 Fit Mode: cover
+MultiDeviceMockup.tsx:708 Original Mask Size: Object
+MultiDeviceMockup.tsx:709 Canvas Size: Object
+MultiDeviceMockup.tsx:710 Composite Canvas Size: Object
+MultiDeviceMockup.tsx:732 Expected Pixel Coords: Object
+MultiDeviceMockup.tsx:733 Actual Canvas Size (rw, rh): Object
+MultiDeviceMockup.tsx:736 🚨 SIZE MISMATCH DETECTED!
+（匿名） @ MultiDeviceMockup.tsx:736このエラーを分析
+MultiDeviceMockup.tsx:737 Expected: 561 x 336
+（匿名） @ MultiDeviceMockup.tsx:737このエラーを分析
+MultiDeviceMockup.tsx:738 Actual: 758 x 454
+（匿名） @ MultiDeviceMockup.tsx:738このエラーを分析
+MultiDeviceMockup.tsx:739 This will cause the image to not fit properly in the designated area!
+（匿名） @ MultiDeviceMockup.tsx:739このエラーを分析
+MultiDeviceMockup.tsx:780 Fit Result: Object
+MultiDeviceMockup.tsx:800 Applying corner radius: 6.72 px
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.
+logCoordinateTransform @ debugVisualization.ts:155
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:110 🔍 Device 1 Coordinate Transform Analysis
+debugVisualization.ts:112 📐 Frame Natural Size: Object
+debugVisualization.ts:113 📦 Container Size: Object
+debugVisualization.ts:114 📍 Region (%): Object
+debugVisualization.ts:133 ✅ Expected Coords: Object
+debugVisualization.ts:134 ❌ Actual Coords: Object
+debugVisualization.ts:143 ⚠️ Difference: Object
+debugVisualization.ts:153 🚨 COORDINATE MISMATCH DETECTED!
+logCoordinateTransform @ debugVisualization.ts:153
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:154 The actual drawing coordinates do not match the expected coordinates.
+logCoordinateTransform @ debugVisualization.ts:154
+（匿名） @ MultiDeviceMockup.tsx:678このエラーを分析
+debugVisualization.ts:155 This will cause the image to be positioned incorrectly.

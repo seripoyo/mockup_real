@@ -1324,7 +1324,7 @@ hapticFeedback('medium');
 
 #### ローカル合成処理
 
-```typescript
+<!-- ```typescript
 async function handleLocalCompose(
   frameImage: HTMLImageElement,
   regions: ScreenRegion[],
@@ -1359,7 +1359,7 @@ async function handleLocalCompose(
   
   return canvas.toDataURL('image/png');
 }
-```
+``` -->
 
 ### アセットパス
 
@@ -1626,7 +1626,7 @@ project-root/
 | ファイル名 | 概要 |
 |-----------|------|
 | `screenDetection.ts` | 黒フレーム囲み画面領域検出。detectDeviceScreens、calculateBezelScore等 |
-| `perspectiveTransform.ts` | 4点透視変換行列計算とCanvas描画。drawPerspectiveImage |
+| `perspectiveTransform.ts` | 4点変換行列計算とCanvas描画。drawPerspectiveImage |
 | `presetParser.ts` | プリセットファイル名から属性抽出。parsePresetFilename |
 | `mobileFeatures.ts` | モバイルAPI統合。saveImageToDevice、vibrate、hapticFeedback、callNative |
 | `imageUtils.ts` | 画像リサイズ、フォーマット変換、dataURL変換等のヘルパー |
