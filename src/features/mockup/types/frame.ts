@@ -21,6 +21,7 @@ export interface ScreenRegion {
 export interface DeviceRegionState {
   deviceIndex: DeviceIndex;
   rect: ScreenRectPct | null;
+  corners: [Point, Point, Point, Point] | null;  // 検出領域の4隅座標を追加
   maskDataUrl: string | null;
   hardMaskUrl: string | null;
   darkOverlayUrl: string | null;
@@ -29,6 +30,19 @@ export interface DeviceRegionState {
   imageNatural: { w: number; h: number } | null;
   fillColor: string;
   isActive: boolean;
+  // 画像の実際の表示位置情報を追加
+  displayPosition?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
+// Point型を追加
+export interface Point {
+  x: number;
+  y: number;
 }
 
 export interface FrameMeta {
