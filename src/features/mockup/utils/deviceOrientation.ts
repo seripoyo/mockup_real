@@ -153,3 +153,173 @@ export function generateDeviceDebugInfo(
 
   return info;
 }
+
+/**
+ * ノッチ/ダイナミックアイランドの位置を検出して、デバイスの向きを判定
+ * 改良版：デバイスの実際の回転角度も考慮
+ * @param maskData マスクのImageData
+ * @param canvasWidth キャンバスの幅
+ * @param canvasHeight キャンバスの高さ
+ * @returns 検出された向き（0: 上, 90: 右, 180: 下, 270: 左, -90: 左）
+ */
+export function detectNotchOrientation(
+  maskData: ImageData,
+  canvasWidth: number,
+  canvasHeight: number
+): number {
+  const data = maskData.data;
+
+  // ノッチ（黒い部分）の重心を計算
+  let blackPixelXSum = 0;
+  let blackPixelYSum = 0;
+  let blackPixelCount = 0;
+
+  // 全体をスキャンして黒いピクセルの位置を収集
+  for (let y = 0; y < canvasHeight; y++) {
+    for (let x = 0; x < canvasWidth; x++) {
+      const idx = (y * canvasWidth + x) * 4;
+      const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+
+      if (luminance < 30) {  // 黒いピクセル
+        blackPixelXSum += x;
+        blackPixelYSum += y;
+        blackPixelCount++;
+      }
+    }
+  }
+
+  // ノッチが検出されない場合はデフォルト
+  if (blackPixelCount < 100) {
+    return 0;
+  }
+
+  // ノッチの重心を計算
+  const notchCenterX = blackPixelXSum / blackPixelCount;
+  const notchCenterY = blackPixelYSum / blackPixelCount;
+
+  // キャンバスの中心
+  const centerX = canvasWidth / 2;
+  const centerY = canvasHeight / 2;
+
+  // ノッチの相対位置（中心からの位置）
+  const relX = notchCenterX - centerX;
+  const relY = notchCenterY - centerY;
+
+  // 各辺からの距離を計算
+  const distFromTop = notchCenterY;
+  const distFromBottom = canvasHeight - notchCenterY;
+  const distFromLeft = notchCenterX;
+  const distFromRight = canvasWidth - notchCenterX;
+
+  // 最も近い辺を見つける
+  const minDist = Math.min(distFromTop, distFromBottom, distFromLeft, distFromRight);
+
+  // デバイスの傾きを考慮した回転角度の決定
+  // 傾いたデバイスの場合、より複雑な判定が必要
+
+  if (minDist === distFromTop) {
+    // ノッチが上部に最も近い
+
+    // 上部でも左右どちらかに偏っている場合の補正
+    const xOffset = Math.abs(relX);
+    const yOffset = Math.abs(distFromTop);
+
+    if (xOffset > canvasWidth * 0.3) {
+      // 大きく横に傾いている場合
+      if (relX < 0) {
+        // 左上にノッチがある（左に傾いたスマホ）
+        return -45; // 左斜め上
+      } else {
+        // 右上にノッチがある（右に傾いたスマホ）
+        return 45; // 右斜め上
+      }
+    }
+    return 0; // 正常な向き（上向き）
+
+  } else if (minDist === distFromBottom) {
+    // ノッチが下部に最も近い（上下反転）
+    return 180;
+
+  } else if (minDist === distFromLeft) {
+    // ノッチが左側に最も近い
+
+    // 左側でも上下どちらかに偏っている場合の補正
+    if (relY < -canvasHeight * 0.2) {
+      // 左上にノッチ（左斜め上向き）
+      return -45;
+    } else if (relY > canvasHeight * 0.2) {
+      // 左下にノッチ（左斜め下向き）
+      return -135;
+    }
+    return -90; // 左に90度回転
+
+  } else if (minDist === distFromRight) {
+    // ノッチが右側に最も近い
+
+    // 右側でも上下どちらかに偏っている場合の補正
+    if (relY < -canvasHeight * 0.2) {
+      // 右上にノッチ（右斜め上向き）
+      return 45;
+    } else if (relY > canvasHeight * 0.2) {
+      // 右下にノッチ（右斜め下向き）
+      return 135;
+    }
+    return 90; // 右に90度回転
+  }
+
+  // デフォルトは正常な向き
+  return 0;
+}
+
+/**
+ * マスクの白い領域の主軸角度を計算（PCA: Principal Component Analysis）
+ * デバイスの実際の傾きを検出するため
+ */
+export function calculateDeviceTiltAngle(
+  maskData: ImageData,
+  canvasWidth: number,
+  canvasHeight: number
+): number {
+  const data = maskData.data;
+
+  // 白いピクセル（デバイス本体）の座標を収集
+  const whitePixels: Array<{x: number, y: number}> = [];
+
+  for (let y = 0; y < canvasHeight; y++) {
+    for (let x = 0; x < canvasWidth; x++) {
+      const idx = (y * canvasWidth + x) * 4;
+      const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+
+      if (luminance > 200) {  // 白いピクセル
+        whitePixels.push({x, y});
+      }
+    }
+  }
+
+  if (whitePixels.length === 0) return 0;
+
+  // 重心を計算
+  const centerX = whitePixels.reduce((sum, p) => sum + p.x, 0) / whitePixels.length;
+  const centerY = whitePixels.reduce((sum, p) => sum + p.y, 0) / whitePixels.length;
+
+  // 共分散行列の要素を計算
+  let covXX = 0, covXY = 0, covYY = 0;
+
+  for (const pixel of whitePixels) {
+    const dx = pixel.x - centerX;
+    const dy = pixel.y - centerY;
+    covXX += dx * dx;
+    covXY += dx * dy;
+    covYY += dy * dy;
+  }
+
+  covXX /= whitePixels.length;
+  covXY /= whitePixels.length;
+  covYY /= whitePixels.length;
+
+  // 主軸の角度を計算（固有ベクトルから）
+  const angle = Math.atan2(2 * covXY, covXX - covYY) / 2;
+
+  // ラジアンから度に変換
+  return angle * 180 / Math.PI;
+}

@@ -1,15 +1,23 @@
 import React, { useMemo, useState, useEffect, useLayoutEffect, useRef } from 'react';
 import type { AspectRatio, FrameMeta, ScreenRectPct, DeviceIndex, DeviceRegionState, Point } from '../types/frame';
 import { frames } from '../data/frames';
-import { containSize, coverSize } from '../utils/fit';
+import { containSize, coverSize, coverSizeWithBleed, getOptimalBleedPercent } from '../utils/fit';
 import { DEVICE_COLOR_ORDER, getDeviceColor } from '../../../constants/deviceColors';
 import DebugButton from '../../../components/DebugButton';
+import { DebugPanel } from '../../../components/DebugPanel';
+import {
+  detectWhiteMargins,
+  analyzeDeviceOrientation,
+  type WhiteMarginAnalysis,
+  type DeviceOrientationAnalysis
+} from '../utils/debugAnalysis';
 import {
   getOrientation,
   getDeviceAngle,
   isOrientationMatched,
   getCornerRadius,
   generateDeviceDebugInfo,
+  detectNotchOrientation,
   type DeviceDebugInfo
 } from '../utils/deviceOrientation';
 import {
@@ -40,6 +48,57 @@ function aspectToCss(aspect: AspectRatio) {
 function isWhitePixel(r: number, g: number, b: number, a: number) {
   const thr = 240;
   return a > 200 && r >= thr && g >= thr && b >= thr;
+}
+
+// マスクを指定ピクセル分拡張する関数
+function expandMask(imageData: ImageData, expandPixels: number): ImageData {
+  const width = imageData.width;
+  const height = imageData.height;
+  const src = imageData.data;
+  const output = new ImageData(width, height);
+  const dst = output.data;
+
+  // 初期化：元データをコピー
+  for (let i = 0; i < src.length; i++) {
+    dst[i] = src[i];
+  }
+
+  // 拡張処理：白い領域を広げる
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      const luminance = (src[idx] + src[idx + 1] + src[idx + 2]) / 3;
+
+      // 白いピクセルの場合、周囲を白くする
+      if (luminance > 200) {
+        for (let dy = -expandPixels; dy <= expandPixels; dy++) {
+          for (let dx = -expandPixels; dx <= expandPixels; dx++) {
+            const nx = x + dx;
+            const ny = y + dy;
+
+            // 境界チェック
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              // 円形の拡張（よりスムーズな結果）
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist <= expandPixels) {
+                const nidx = (ny * width + nx) * 4;
+                // 元が黒でない場合のみ白くする（黒フレームは保護）
+                const origLum = (src[nidx] + src[nidx + 1] + src[nidx + 2]) / 3;
+                if (origLum > 50) {  // 完全に黒い部分は拡張しない
+                  dst[nidx] = 255;
+                  dst[nidx + 1] = 255;
+                  dst[nidx + 2] = 255;
+                  dst[nidx + 3] = 255;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return output;
 }
 
 function findNearestWhite(x: number, y: number, data: Uint8ClampedArray, w: number, h: number, maxR = 6) {
@@ -78,6 +137,8 @@ export default function MultiDeviceMockup() {
   const [editedFrameUrl, setEditedFrameUrl] = useState<string | null>(null);
   const [isEditingFrame, setIsEditingFrame] = useState<boolean>(false);
   const [debugMode, setDebugMode] = useState<boolean>(false);
+  const [whiteMarginAnalyses, setWhiteMarginAnalyses] = useState<WhiteMarginAnalysis[]>([]);
+  const [orientationAnalyses, setOrientationAnalyses] = useState<DeviceOrientationAnalysis[]>([]);
 
   // 複数デバイス対応の状態管理
   const [deviceRegions, setDeviceRegions] = useState<DeviceRegionState[]>([]);
@@ -606,8 +667,11 @@ export default function MultiDeviceMockup() {
     // デバイスが存在しない場合は早期リターン
     if (deviceRegions.length === 0) return;
 
+    // debugModeを現在の値として取得
+    const currentDebugMode = debugMode;
+
     // Device状態のデバッグログを出力
-    if (debugMode) {
+    if (currentDebugMode) {
       console.log('=== All Device Regions Status ===');
       deviceRegions.forEach((region, index) => {
         console.log(`Device ${region.deviceIndex}:`, {
@@ -724,22 +788,31 @@ export default function MultiDeviceMockup() {
           canvasHeight
         );
 
-        // デバイスタイプを縦横比で判定（カテゴリーより正確）
+        // デバイスタイプを縦横比で判定（改良版）
+        // 細長い形状（縦横比が極端）はスマートフォンとして認識
         const aspectRatio = canvasWidth / canvasHeight;
+        const inverseAspectRatio = canvasHeight / canvasWidth;
         let deviceType = 'unknown';
-        if (aspectRatio < 0.65) {
-          // 縦長 - スマートフォン
+
+        // 細長い形状の判定（縦向きまたは横向きに関係なく）
+        const isElongated = aspectRatio > 1.8 || inverseAspectRatio > 1.8;
+
+        if (isElongated) {
+          // 細長い形状はスマートフォン（向きを問わず）
           deviceType = 'smartphone';
         } else if (aspectRatio > 1.4) {
-          // 横長 - ラップトップ/デスクトップ
+          // 横長で細長くない - ラップトップ/デスクトップ
           deviceType = 'laptop';
+        } else if (aspectRatio < 0.65) {
+          // 縦長で細長くない - スマートフォン（通常の縦向き）
+          deviceType = 'smartphone';
         } else {
           // その他 - タブレットまたは正方形に近い
           deviceType = 'tablet';
         }
 
         // マスク処理関連のデバッグログ（デバッグモードがONの時のみ）
-        if (debugMode) {
+        if (currentDebugMode) {
           console.log(`🎭 Device ${region.deviceIndex} Mask Processing:`, {
             deviceType: deviceType,
             aspectRatio: aspectRatio.toFixed(2),
@@ -769,7 +842,7 @@ export default function MultiDeviceMockup() {
             height: Math.round(region.rect.hPct * displayHeight)
           };
 
-          if (debugMode) {
+          if (currentDebugMode) {
             console.log('Expected Pixel Coords:', expectedPixels);
             console.log('Actual Canvas Size:', { width: canvasWidth, height: canvasHeight });
             console.log('Original Detection Size (Natural):', { width: rw, height: rh });
@@ -809,16 +882,18 @@ export default function MultiDeviceMockup() {
             sourceWidth = rotCanvas.width;
             sourceHeight = rotCanvas.height;
 
-            if (debugMode) {
+            if (currentDebugMode) {
               console.log('Image rotated 90°, new size:', { w: sourceWidth, h: sourceHeight });
             }
           }
         }
 
         // 検出領域に画像をフィット（coverモードのみ使用）
-        const fitRect = coverSize(canvasWidth, canvasHeight, sourceWidth, sourceHeight);
+        // デバイスタイプに応じた最適なブリード値を適用
+        const optimalBleed = getOptimalBleedPercent(deviceType);
+        const fitRect = coverSizeWithBleed(canvasWidth, canvasHeight, sourceWidth, sourceHeight, optimalBleed);
 
-        if (debugMode) {
+        if (currentDebugMode) {
           console.log('Fit Result:', {
             mode: 'cover',
             originalMaskSize: { rw, rh },
@@ -839,8 +914,108 @@ export default function MultiDeviceMockup() {
         const tempImageCtx = tempImageCanvas.getContext('2d', { alpha: true });
 
         if (tempImageCtx) {
-          // 画像を描画（coverフィット）
-          tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+          // 高品質な画像補間設定
+          tempImageCtx.imageSmoothingEnabled = true;
+          tempImageCtx.imageSmoothingQuality = 'high';
+
+          // 画像を描画（必要に応じて回転）
+          tempImageCtx.save();
+
+          // 回転が必要な場合（ノッチ位置による補正）
+          let rotationAngle = 0;
+
+          // 先にマスクデータを取得してノッチの向きを検出（スマートフォンのみ）
+          if (deviceType === 'smartphone') {
+            const tempMaskCanvas = document.createElement('canvas');
+            tempMaskCanvas.width = canvasWidth;
+            tempMaskCanvas.height = canvasHeight;
+            const tempMaskCtx = tempMaskCanvas.getContext('2d');
+            if (tempMaskCtx) {
+              tempMaskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
+              const tempMaskData = tempMaskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+              // ノッチの位置を検出
+              rotationAngle = detectNotchOrientation(tempMaskData, canvasWidth, canvasHeight);
+
+              // スマートフォンの向きに応じた追加補正
+              // 横向きのスマートフォンの場合、画像も横向きにする必要がある
+              const isHorizontalPhone = canvasWidth > canvasHeight;
+              const isHorizontalImage = sourceWidth > sourceHeight;
+
+              if (isHorizontalPhone && !isHorizontalImage) {
+                // デバイスは横向きだが画像は縦向き → 90度回転が必要
+                rotationAngle = rotationAngle !== 0 ? rotationAngle : 90;
+              } else if (!isHorizontalPhone && isHorizontalImage) {
+                // デバイスは縦向きだが画像は横向き → 90度回転が必要
+                rotationAngle = rotationAngle !== 0 ? rotationAngle : -90;
+              }
+
+              // 斜め配置の場合の特別処理
+              if (Math.abs(rotationAngle) === 45 || Math.abs(rotationAngle) === 135) {
+                // 斜め配置の場合、デバイスの主軸に合わせて画像を回転
+                if (isHorizontalPhone) {
+                  // 横向きスマホの斜め配置
+                  rotationAngle = isHorizontalImage ? rotationAngle : rotationAngle + 90;
+                } else {
+                  // 縦向きスマホの斜め配置
+                  rotationAngle = isHorizontalImage ? rotationAngle - 90 : rotationAngle;
+                }
+              }
+
+              if (currentDebugMode) {
+                console.log(`🔄 Device ${region.deviceIndex} Orientation Analysis:`, {
+                  detectedRotation: rotationAngle,
+                  deviceType: deviceType,
+                  deviceIndex: region.deviceIndex,
+                  canvasSize: { width: canvasWidth, height: canvasHeight },
+                  imageSize: { width: sourceWidth, height: sourceHeight },
+                  isHorizontalPhone,
+                  isHorizontalImage,
+                  optimalBleed: optimalBleed,
+                  reason: rotationAngle !== 0 ? 'Notch/Dynamic Island position correction' : 'No rotation needed'
+                });
+              }
+            }
+          }
+
+          // 回転処理
+          if (rotationAngle !== 0) {
+            // キャンバスの中心を基準に回転
+            const centerX = canvasWidth / 2;
+            const centerY = canvasHeight / 2;
+
+            tempImageCtx.translate(centerX, centerY);
+            tempImageCtx.rotate((rotationAngle * Math.PI) / 180);
+            tempImageCtx.translate(-centerX, -centerY);
+
+            // 回転後の画像を調整（必要に応じてサイズを変更）
+            // 斜め回転の場合も考慮
+            const absAngle = Math.abs(rotationAngle);
+
+            if (absAngle === 90 || absAngle === 270) {
+              // 90度または270度の場合、幅と高さを入れ替えて計算
+              const adjustedFitRect = coverSizeWithBleed(canvasWidth, canvasHeight, sourceHeight, sourceWidth, optimalBleed);
+              tempImageCtx.drawImage(sourceImage, adjustedFitRect.left, adjustedFitRect.top, adjustedFitRect.w, adjustedFitRect.h);
+            } else if (absAngle === 45 || absAngle === 135) {
+              // 斜め回転の場合、画像を少し拡大してフィット
+              const scaleFactor = 1.2; // 斜めの場合は少し大きくする
+              const adjustedFitRect = {
+                w: fitRect.w * scaleFactor,
+                h: fitRect.h * scaleFactor,
+                left: (canvasWidth - fitRect.w * scaleFactor) / 2,
+                top: (canvasHeight - fitRect.h * scaleFactor) / 2
+              };
+              tempImageCtx.drawImage(sourceImage, adjustedFitRect.left, adjustedFitRect.top, adjustedFitRect.w, adjustedFitRect.h);
+            } else {
+              // 0度または180度の場合、通常通り
+              tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+            }
+          } else {
+            // 回転なしの場合、通常描画
+            tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+          }
+
+          tempImageCtx.restore();
 
           // ステップ2: マスクを準備（フェザリング処理も含む）
           const maskCanvas = document.createElement('canvas');
@@ -849,11 +1024,23 @@ export default function MultiDeviceMockup() {
           const maskCtx = maskCanvas.getContext('2d', { alpha: true });
 
           if (maskCtx) {
+            // 高品質なマスク処理
+            maskCtx.imageSmoothingEnabled = true;
+            maskCtx.imageSmoothingQuality = 'high';
+
             // まずマスクをそのまま描画
             maskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
 
-            // マスクデータを取得して黒い部分を透明に変換
-            const maskData = maskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+            // マスクデータを取得
+            let maskData = maskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+            // マスクを内側に5px拡張（白い隙間を覆うため）
+            const expandPixels = 5;
+            const expandedMaskData = expandMask(maskData, expandPixels);
+            maskCtx.putImageData(expandedMaskData, 0, 0);
+
+            // 拡張後のマスクデータを再取得して黒い部分を透明に変換
+            maskData = maskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
             const data = maskData.data;
 
             // デバッグ用：黒いピクセルのカウント
@@ -894,7 +1081,7 @@ export default function MultiDeviceMockup() {
             }
 
             // デバッグログ出力
-            if (debugMode && blackPixelCount > 0) {
+            if (currentDebugMode && blackPixelCount > 0) {
               console.log(`🕳️ Device ${region.deviceIndex} Notch/Cutout Detection:`, {
                 blackPixels: blackPixelCount,
                 whitePixels: whitePixelCount,
@@ -927,8 +1114,9 @@ export default function MultiDeviceMockup() {
             // ステップ3: メインキャンバスをクリアして合成
             cctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // 画像補間を無効化してシャープな境界を実現
-            cctx.imageSmoothingEnabled = false;
+            // 高品質な合成設定（シャープな境界を保ちつつ、画質を向上）
+            cctx.imageSmoothingEnabled = true;
+            cctx.imageSmoothingQuality = 'high';
             maskCtx.imageSmoothingEnabled = false;
 
             // 画像を描画
@@ -944,7 +1132,7 @@ export default function MultiDeviceMockup() {
           }
         }
 
-        if (debugMode) {
+        if (currentDebugMode) {
           console.log(`🎭 Device ${region.deviceIndex} Mask Applied:`, {
             maskSize: { width: mk.width, height: mk.height },
             canvasSize: { width: canvasWidth, height: canvasHeight },
@@ -956,6 +1144,78 @@ export default function MultiDeviceMockup() {
         }
 
         const compositeUrl = comp.toDataURL('image/png');
+
+        // デバッグモードの場合、分析を実行
+        if (currentDebugMode) {
+          // デバッグ分析用に新しいマスクキャンバスを作成（元のCanvasを壊さないため）
+          const debugMaskCanvas = document.createElement('canvas');
+          debugMaskCanvas.width = canvasWidth;
+          debugMaskCanvas.height = canvasHeight;
+          const debugMaskCtx = debugMaskCanvas.getContext('2d');
+
+          if (debugMaskCtx) {
+            // マスク画像を再度描画（分析用）
+            debugMaskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
+
+            // 合成済み画像のコピーも作成（分析用）
+            const debugCompCanvas = document.createElement('canvas');
+            debugCompCanvas.width = canvasWidth;
+            debugCompCanvas.height = canvasHeight;
+            const debugCompCtx = debugCompCanvas.getContext('2d');
+
+            if (debugCompCtx) {
+              // 合成済み画像をコピー
+              debugCompCtx.drawImage(comp, 0, 0);
+
+              // 白い余白の検出
+              const whiteMarginAnalysis = detectWhiteMargins(
+                debugCompCanvas,
+                debugMaskCanvas,
+                region.deviceIndex,
+                deviceType
+              );
+
+              // デバイスの向き分析
+              const orientationAnalysis = analyzeDeviceOrientation(
+                debugMaskCanvas,
+                region.deviceIndex,
+                deviceType
+              );
+
+              // 分析結果をステートに保存（後でまとめて更新）
+              setWhiteMarginAnalyses(prev => {
+                const updated = [...prev];
+                const existingIndex = updated.findIndex(a => a.deviceIndex === region.deviceIndex);
+                if (existingIndex >= 0) {
+                  updated[existingIndex] = whiteMarginAnalysis;
+                } else {
+                  updated.push(whiteMarginAnalysis);
+                }
+                return updated;
+              });
+
+              setOrientationAnalyses(prev => {
+                const updated = [...prev];
+                const existingIndex = updated.findIndex(a => a.deviceIndex === region.deviceIndex);
+                if (existingIndex >= 0) {
+                  updated[existingIndex] = orientationAnalysis;
+                } else {
+                  updated.push(orientationAnalysis);
+                }
+                return updated;
+              });
+
+              // 視覚化機能は削除（元のCanvasを変更するため）
+              // デバッグ情報はコンソールとDebugPanelで確認
+
+              // デバッグログ
+              console.log('🔍 Debug Analysis for Device', region.deviceIndex, {
+                whiteMargin: whiteMarginAnalysis,
+                orientation: orientationAnalysis
+              });
+            }
+          }
+        }
 
         // 表示位置情報を計算
         let displayPosition = { x: 0, y: 0, width: canvasWidth, height: canvasHeight };
@@ -983,7 +1243,7 @@ export default function MultiDeviceMockup() {
           ));
         }
 
-        if (debugMode && !isCancelled) {
+        if (currentDebugMode && !isCancelled) {
           console.log('===========================');
         }
       })();
@@ -992,7 +1252,7 @@ export default function MultiDeviceMockup() {
     return () => {
       isCancelled = true;
     };
-  }, [imageUrls, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, debugMode, deviceRegions, feather]);
+  }, [imageUrls, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, deviceRegions, feather]);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
@@ -1339,6 +1599,13 @@ export default function MultiDeviceMockup() {
           };
           return JSON.stringify(data, null, 2);
         }}
+      />
+
+      {/* デバッグパネル */}
+      <DebugPanel
+        whiteMarginAnalyses={whiteMarginAnalyses}
+        orientationAnalyses={orientationAnalyses}
+        isVisible={debugMode}
       />
     </div>
   );
