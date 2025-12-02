@@ -74,7 +74,7 @@ export default function MultiDeviceMockup() {
   const [frameNatural, setFrameNatural] = useState<{ w: number; h: number } | null>(null);
   const [containerSize, setContainerSize] = useState<{ w: number; h: number }>({ w: 800, h: 800 });
   const [fillEnabled, setFillEnabled] = useState<boolean>(true);
-  const [feather, setFeather] = useState<number>(2);
+  const [feather, setFeather] = useState<number>(0); // エッジを明確にするため0に設定
   const [editedFrameUrl, setEditedFrameUrl] = useState<string | null>(null);
   const [isEditingFrame, setIsEditingFrame] = useState<boolean>(false);
   const [debugMode, setDebugMode] = useState<boolean>(false);
@@ -724,22 +724,31 @@ export default function MultiDeviceMockup() {
           canvasHeight
         );
 
-        // 詳細なデバッグログ出力（デバッグモードがONの時のみ）
+        // デバイスタイプを縦横比で判定（カテゴリーより正確）
+        const aspectRatio = canvasWidth / canvasHeight;
+        let deviceType = 'unknown';
+        if (aspectRatio < 0.65) {
+          // 縦長 - スマートフォン
+          deviceType = 'smartphone';
+        } else if (aspectRatio > 1.4) {
+          // 横長 - ラップトップ/デスクトップ
+          deviceType = 'laptop';
+        } else {
+          // その他 - タブレットまたは正方形に近い
+          deviceType = 'tablet';
+        }
+
+        // マスク処理関連のデバッグログ（デバッグモードがONの時のみ）
         if (debugMode) {
-          console.log(`=== Device ${region.deviceIndex} Debug Info ===`);
-          console.log('Frame:', debugInfo.frameName);
-          console.log('Device Angle:', debugInfo.deviceAngle, '°');
-          console.log('Region Size:', debugInfo.regionSize);
-          console.log('Region Orientation:', debugInfo.regionOrientation);
-          console.log('Corner Radius:', debugInfo.cornerRadius, 'px');
-          console.log('Image Size:', { w: up.width, h: up.height });
-          console.log('Image Orientation:', getOrientation(up.width, up.height));
-          console.log('Orientation Matched:', !needsRotation);
-          console.log('Needs Rotation:', needsRotation);
-          console.log('Fit Mode:', 'cover');
-          console.log('Original Mask Size:', { w: rw, h: rh });
-          console.log('Canvas Size:', { w: canvasWidth, h: canvasHeight });
-          console.log('Composite Canvas Size:', { w: comp.width, h: comp.height });
+          console.log(`🎭 Device ${region.deviceIndex} Mask Processing:`, {
+            deviceType: deviceType,
+            aspectRatio: aspectRatio.toFixed(2),
+            cornerRadius: `${getCornerRadius(canvasWidth, canvasHeight, deviceType)}px`,
+            featherStrength: `${feather}px`,
+            maskSize: { width: rw, height: rh },
+            canvasSize: { width: canvasWidth, height: canvasHeight },
+            orientation: getOrientation(canvasWidth, canvasHeight)
+          });
         }
 
         // 実際の領域パーセンテージと期待される座標
@@ -819,40 +828,132 @@ export default function MultiDeviceMockup() {
           });
         }
 
-        // 画像を描画
-        cctx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
 
-        // マスクで切り抜き（マスクを適切なサイズにスケール）
-        cctx.globalCompositeOperation = 'destination-in';
-        cctx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
+        // マスクを使用した正確な画像クリッピング処理
+        // 重要: マスクの形状に完全に従って画像を切り抜く
 
-        // 角丸を適用（canvasサイズに基づいて計算）
-        const cornerRadius = getCornerRadius(canvasWidth, canvasHeight, selectedFrame?.category);
-        if (cornerRadius > 0) {
-          if (debugMode) {
-            console.log('Applying corner radius:', cornerRadius, 'px');
+        // ステップ1: 画像を一時キャンバスに描画
+        const tempImageCanvas = document.createElement('canvas');
+        tempImageCanvas.width = canvasWidth;
+        tempImageCanvas.height = canvasHeight;
+        const tempImageCtx = tempImageCanvas.getContext('2d', { alpha: true });
+
+        if (tempImageCtx) {
+          // 画像を描画（coverフィット）
+          tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+
+          // ステップ2: マスクを準備（フェザリング処理も含む）
+          const maskCanvas = document.createElement('canvas');
+          maskCanvas.width = canvasWidth;
+          maskCanvas.height = canvasHeight;
+          const maskCtx = maskCanvas.getContext('2d', { alpha: true });
+
+          if (maskCtx) {
+            // まずマスクをそのまま描画
+            maskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
+
+            // マスクデータを取得して黒い部分を透明に変換
+            const maskData = maskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+            const data = maskData.data;
+
+            // デバッグ用：黒いピクセルのカウント
+            let blackPixelCount = 0;
+            let whitePixelCount = 0;
+            let grayPixelCount = 0;
+
+            // 黒い部分（ノッチ、ダイナミックアイランド）を検出して透明にする
+            for (let i = 0; i < data.length; i += 4) {
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+
+              // 輝度計算（0-255の範囲）
+              const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+              // 黒い部分（輝度が低い部分）は完全に透明に
+              // 白い部分（輝度が高い部分）は不透明に
+              // グレースケールのマスクをアルファチャンネルに変換
+              if (luminance < 30) {
+                // 完全に黒い部分（ノッチなど）は透明
+                data[i + 3] = 0;
+                blackPixelCount++;
+              } else if (luminance < 240) {
+                // グレーの部分は半透明（アンチエイリアス処理）
+                data[i + 3] = luminance;
+                grayPixelCount++;
+              } else {
+                // 白い部分は完全に不透明
+                data[i + 3] = 255;
+                whitePixelCount++;
+              }
+
+              // RGB値を白に設定（アルファチャンネルで制御）
+              data[i] = 255;
+              data[i + 1] = 255;
+              data[i + 2] = 255;
+            }
+
+            // デバッグログ出力
+            if (debugMode && blackPixelCount > 0) {
+              console.log(`🕳️ Device ${region.deviceIndex} Notch/Cutout Detection:`, {
+                blackPixels: blackPixelCount,
+                whitePixels: whitePixelCount,
+                grayPixels: grayPixelCount,
+                totalPixels: data.length / 4,
+                blackRatio: `${((blackPixelCount / (data.length / 4)) * 100).toFixed(2)}%`,
+                deviceType: deviceType,
+                hasNotch: blackPixelCount > 100 // 100ピクセル以上の黒い部分があればノッチとみなす
+              });
+            }
+
+            // 変換したマスクをキャンバスに戻す
+            maskCtx.putImageData(maskData, 0, 0);
+
+            // フェザリング効果が必要な場合
+            if (feather > 0) {
+              const blurCanvas = document.createElement('canvas');
+              blurCanvas.width = canvasWidth;
+              blurCanvas.height = canvasHeight;
+              const blurCtx = blurCanvas.getContext('2d', { alpha: true });
+
+              if (blurCtx) {
+                blurCtx.filter = `blur(${feather}px)`;
+                blurCtx.drawImage(maskCanvas, 0, 0);
+                maskCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+                maskCtx.drawImage(blurCanvas, 0, 0);
+              }
+            }
+
+            // ステップ3: メインキャンバスをクリアして合成
+            cctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // 画像補間を無効化してシャープな境界を実現
+            cctx.imageSmoothingEnabled = false;
+            maskCtx.imageSmoothingEnabled = false;
+
+            // 画像を描画
+            cctx.drawImage(tempImageCanvas, 0, 0);
+
+            // マスクでクリッピング
+            cctx.globalCompositeOperation = 'destination-in';
+            cctx.drawImage(maskCanvas, 0, 0);
+            cctx.globalCompositeOperation = 'source-over';
+
+            // 画像補間を元に戻す
+            cctx.imageSmoothingEnabled = true;
           }
-
-          cctx.globalCompositeOperation = 'destination-in';
-          cctx.beginPath();
-
-          // 角丸パスを作成（canvasサイズを使用）
-          cctx.moveTo(cornerRadius, 0);
-          cctx.lineTo(canvasWidth - cornerRadius, 0);
-          cctx.quadraticCurveTo(canvasWidth, 0, canvasWidth, cornerRadius);
-          cctx.lineTo(canvasWidth, canvasHeight - cornerRadius);
-          cctx.quadraticCurveTo(canvasWidth, canvasHeight, canvasWidth - cornerRadius, canvasHeight);
-          cctx.lineTo(cornerRadius, canvasHeight);
-          cctx.quadraticCurveTo(0, canvasHeight, 0, canvasHeight - cornerRadius);
-          cctx.lineTo(0, cornerRadius);
-          cctx.quadraticCurveTo(0, 0, cornerRadius, 0);
-          cctx.closePath();
-
-          cctx.fillStyle = '#ffffff';
-          cctx.fill();
         }
 
-        cctx.globalCompositeOperation = 'source-over';
+        if (debugMode) {
+          console.log(`🎭 Device ${region.deviceIndex} Mask Applied:`, {
+            maskSize: { width: mk.width, height: mk.height },
+            canvasSize: { width: canvasWidth, height: canvasHeight },
+            imagePosition: fitRect,
+            featherStrength: `${feather}px`,
+            clippingMode: 'destination-in',
+            processOrder: 'image → mask → clip'
+          });
+        }
 
         const compositeUrl = comp.toDataURL('image/png');
 
@@ -966,8 +1067,17 @@ export default function MultiDeviceMockup() {
           <input type="checkbox" checked={fillEnabled} onChange={(e)=> setFillEnabled(e.target.checked)} />
           クリックで白領域塗り
         </label>
-        <span className="ml-4 text-sm text-gray-600">マスクの滑らかさ:</span>
-        <input type="range" min={0} max={10} step={1} value={feather} onChange={(e)=> setFeather(parseInt(e.target.value))} />
+        <span className="ml-4 text-sm text-gray-600">エッジの滑らかさ:</span>
+        <input
+          type="range"
+          min={0}
+          max={10}
+          step={1}
+          value={feather}
+          onChange={(e)=> setFeather(parseInt(e.target.value))}
+          title={`現在の値: ${feather}px`}
+        />
+        <span className="ml-2 text-xs text-gray-500">{feather}px</span>
         <button onClick={clearOverlay} className="ml-2 px-2 py-1 text-sm border rounded bg-white hover:bg-gray-50">全クリア</button>
 
         {/* Debug mode toggle */}
@@ -1080,16 +1190,37 @@ export default function MultiDeviceMockup() {
 
           {/* Composite results for each device */}
           {selectedFrame && frameNatural && (() => {
-            // デバイスの奥行き順序を計算（Y座標とサイズに基づく）
+            // デバイスの奥行き順序を計算（デバイスタイプとY座標に基づく）
             const sortedRegions = deviceRegions
               .map((region, idx) => ({ region, idx }))
               .filter(item => item.region.compositeUrl && item.region.rect)
               .sort((a, b) => {
-                // Y座標が小さい（上にある）デバイスを後ろに
+                // デバイスタイプを判定（アスペクト比ベース）
+                const getDeviceType = (rect: ScreenRectPct) => {
+                  const aspectRatio = rect.wPct / rect.hPct;
+                  if (aspectRatio < 0.65) return 'smartphone'; // 縦長
+                  if (aspectRatio > 1.4) return 'laptop'; // 横長
+                  return 'tablet'; // その他
+                };
+
+                const typeA = getDeviceType(a.region.rect!);
+                const typeB = getDeviceType(b.region.rect!);
+
+                // ラップトップ/タブレットを後ろに（先に描画）、スマートフォンを前に（後に描画）
+                const priorityMap: Record<string, number> = {
+                  'laptop': 0,
+                  'tablet': 1,
+                  'smartphone': 2
+                };
+
+                const priorityDiff = priorityMap[typeA] - priorityMap[typeB];
+                if (priorityDiff !== 0) return priorityDiff;
+
+                // 同じタイプの場合はY座標で判定（上にあるものを後ろに）
                 const yDiff = (a.region.rect!.yPct - b.region.rect!.yPct) * 100;
                 if (Math.abs(yDiff) > 5) return yDiff;
 
-                // Y座標が近い場合は面積が大きいものを後ろに
+                // Y座標も近い場合は面積が大きいものを後ろに
                 const areaA = a.region.rect!.wPct * a.region.rect!.hPct;
                 const areaB = b.region.rect!.wPct * b.region.rect!.hPct;
                 return areaB - areaA;
