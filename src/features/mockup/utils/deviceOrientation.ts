@@ -72,17 +72,20 @@ export function getCornerRadius(
 ): number {
   const minDimension = Math.min(width, height);
 
-  // カテゴリーに基づく角丸の割合
+  // カテゴリーに基づく角丸の割合（より滑らかに調整）
   if (deviceCategory === 'smartphone' || deviceCategory?.includes('phone')) {
-    return minDimension * 0.08; // スマートフォンは8%
+    // スマートフォンはより丸みを帯びた角（10-12%）
+    return minDimension * 0.11;
   } else if (deviceCategory === 'tablet') {
-    return minDimension * 0.05; // タブレットは5%
+    // タブレットは中程度の角丸（6-8%）
+    return minDimension * 0.07;
   } else if (deviceCategory === 'laptop' || deviceCategory === 'desktop') {
-    return minDimension * 0.02; // PCは2%
+    // PCは控えめな角丸（3-4%）
+    return minDimension * 0.035;
   }
 
-  // デフォルトは3%
-  return minDimension * 0.03;
+  // デフォルトは5%
+  return minDimension * 0.05;
 }
 
 /**
