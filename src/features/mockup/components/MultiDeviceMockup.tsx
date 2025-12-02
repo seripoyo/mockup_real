@@ -606,6 +606,22 @@ export default function MultiDeviceMockup() {
     // デバイスが存在しない場合は早期リターン
     if (deviceRegions.length === 0) return;
 
+    // Device状態のデバッグログを出力
+    if (debugMode) {
+      console.log('=== All Device Regions Status ===');
+      deviceRegions.forEach((region, index) => {
+        console.log(`Device ${region.deviceIndex}:`, {
+          arrayIndex: index,
+          deviceIndex: region.deviceIndex,
+          isActive: region.isActive,
+          hasImage: !!region.imageUrl,
+          hasRect: !!region.rect,
+          hasComposite: !!region.compositeUrl,
+        });
+      });
+      console.log('===========================');
+    }
+
     let isCancelled = false;
 
     // 実際に存在するデバイスのみを処理
@@ -614,8 +630,8 @@ export default function MultiDeviceMockup() {
 
       (async () => {
         if (isCancelled) return;
-        const last = lastMasksRef.current.get(deviceIndex as DeviceIndex);
-        const imageUrl = imageUrls[deviceIndex];
+        const last = lastMasksRef.current.get(region.deviceIndex as DeviceIndex);
+        const imageUrl = imageUrls[region.deviceIndex];
         if (!last || !region.hardMaskUrl || !imageUrl || !region.imageNatural || !region.rect) {
           if (region.compositeUrl) {
             setDeviceRegions(prev => prev.map((r, idx) =>
@@ -674,13 +690,29 @@ export default function MultiDeviceMockup() {
         );
 
         // 座標変換の詳細ログを出力
-        if (frameNatural) {
+        if (frameNatural && region.rect) {
+          const scale = Math.min(
+            containerSize.w / frameNatural.w,
+            containerSize.h / frameNatural.h
+          );
+          const displayWidth = frameNatural.w * scale;
+          const displayHeight = frameNatural.h * scale;
+          const offsetX = (containerSize.w - displayWidth) / 2;
+          const offsetY = (containerSize.h - displayHeight) / 2;
+
+          const actualPosition = {
+            x: Math.round(offsetX + region.rect.xPct * displayWidth),
+            y: Math.round(offsetY + region.rect.yPct * displayHeight),
+            width: canvasWidth,
+            height: canvasHeight
+          };
+
           logCoordinateTransform(
-            deviceIndex,
+            region.deviceIndex,
             frameNatural,
             containerSize,
             region.rect,
-            { x: 0, y: 0, width: canvasWidth, height: canvasHeight } // 修正された実際の座標
+            actualPosition
           );
         }
 
@@ -694,7 +726,7 @@ export default function MultiDeviceMockup() {
 
         // 詳細なデバッグログ出力（デバッグモードがONの時のみ）
         if (debugMode) {
-          console.log(`=== Device ${deviceIndex} Debug Info ===`);
+          console.log(`=== Device ${region.deviceIndex} Debug Info ===`);
           console.log('Frame:', debugInfo.frameName);
           console.log('Device Angle:', debugInfo.deviceAngle, '°');
           console.log('Region Size:', debugInfo.regionSize);
@@ -730,20 +762,21 @@ export default function MultiDeviceMockup() {
 
           if (debugMode) {
             console.log('Expected Pixel Coords:', expectedPixels);
-            console.log('Actual Canvas Size (rw, rh):', { width: rw, height: rh });
+            console.log('Actual Canvas Size:', { width: canvasWidth, height: canvasHeight });
+            console.log('Original Detection Size (Natural):', { width: rw, height: rh });
 
-            if (Math.abs(expectedPixels.width - rw) > 5 || Math.abs(expectedPixels.height - rh) > 5) {
+            if (Math.abs(expectedPixels.width - canvasWidth) > 5 || Math.abs(expectedPixels.height - canvasHeight) > 5) {
               console.error('🚨 SIZE MISMATCH DETECTED!');
               console.error('Expected:', expectedPixels.width, 'x', expectedPixels.height);
-              console.error('Actual:', rw, 'x', rh);
+              console.error('Actual Canvas:', canvasWidth, 'x', canvasHeight);
               console.error('This will cause the image to not fit properly in the designated area!');
             }
           }
         }
 
         // デバッグ情報を保存
-        deviceDebugInfoRef.current[deviceIndex] = debugInfo;
-        debugLogRef.current.push(`device-${deviceIndex}: ${JSON.stringify(debugInfo)}`);
+        deviceDebugInfoRef.current[region.deviceIndex] = debugInfo;
+        debugLogRef.current.push(`device-${region.deviceIndex}: ${JSON.stringify(debugInfo)}`);
 
         let sourceImage: HTMLImageElement | HTMLCanvasElement = up;
         let sourceWidth = up.width;
