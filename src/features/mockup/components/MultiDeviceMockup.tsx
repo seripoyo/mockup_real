@@ -25,6 +25,14 @@ import {
   checkMaskContentAlignment,
   generateDebugReport
 } from '../utils/debugVisualization';
+import {
+  detectDeviceType,
+  detectDeviceTypeFromRegion,
+  determineDeviceOrientation,
+  getDeviceDisplayName,
+  getOptimalBleedForDevice,
+  type DeviceType
+} from '../utils/deviceTypeDetection';
 
 function aspectToCss(aspect: AspectRatio) {
   switch (aspect) {
@@ -148,7 +156,7 @@ export default function MultiDeviceMockup() {
   const [feather, setFeather] = useState<number>(0); // エッジを明確にするため0に設定
   const [editedFrameUrl, setEditedFrameUrl] = useState<string | null>(null);
   const [isEditingFrame, setIsEditingFrame] = useState<boolean>(false);
-  const [debugMode, setDebugMode] = useState<boolean>(false);
+  const [debugMode, setDebugMode] = useState<boolean>(false); // デバッグモードをOFFに
   const [whiteMarginAnalyses, setWhiteMarginAnalyses] = useState<WhiteMarginAnalysis[]>([]);
   const [orientationAnalyses, setOrientationAnalyses] = useState<DeviceOrientationAnalysis[]>([]);
 
@@ -161,6 +169,7 @@ export default function MultiDeviceMockup() {
   const containerRef = useRef<HTMLDivElement>(null);
   const debugLogRef = useRef<string[]>([]);
   const deviceDebugInfoRef = useRef<DeviceDebugInfo[]>([]);
+  const imageUrlsRef = useRef<(string | null)[]>([null, null, null]);
 
   const frameUrl = useMemo(() => (selectedFrame ? (editedFrameUrl ?? selectedFrame.frameImage) : null), [selectedFrame, editedFrameUrl]);
 
@@ -206,12 +215,18 @@ export default function MultiDeviceMockup() {
   }, [aspect]);
 
   useEffect(() => {
+    // imageUrlsが変更されたときにrefも更新
+    imageUrlsRef.current = imageUrls;
+  }, [imageUrls]);
+
+  useEffect(() => {
+    // コンポーネントがアンマウントされる時だけURLをrevoke
     return () => {
-      imageUrls.forEach(url => {
+      imageUrlsRef.current.forEach(url => {
         if (url) URL.revokeObjectURL(url);
       });
     };
-  }, [imageUrls]);
+  }, []);
 
   // フレーム切り替え時に画像とエリア判定をクリア
   useEffect(() => {
@@ -255,8 +270,9 @@ export default function MultiDeviceMockup() {
     if (!file) return;
 
     const url = URL.createObjectURL(file);
+
+    // 古いURLは後でrevokeする（すぐにrevokeしない）
     const oldUrl = imageUrls[deviceIndex];
-    if (oldUrl) URL.revokeObjectURL(oldUrl);
 
     const newUrls = [...imageUrls];
     newUrls[deviceIndex] = url;
@@ -264,13 +280,48 @@ export default function MultiDeviceMockup() {
 
     const probe = new Image();
     probe.onload = () => {
-      setDeviceRegions(prev => prev.map((region, idx) =>
-        idx === deviceIndex
-          ? { ...region, imageUrl: url, imageNatural: { w: probe.naturalWidth, h: probe.naturalHeight } }
-          : region
-      ));
+      console.log(`🎨 Device ${deviceIndex} - Image loaded:`, {
+        width: probe.naturalWidth,
+        height: probe.naturalHeight,
+        url: url.substring(0, 50) + '...'
+      });
+
+      setDeviceRegions(prev => {
+        const updated = prev.map((region, idx) => {
+          if (idx === deviceIndex) {
+            // 画像の自然サイズを設定し、imageUrlも更新
+            const updatedRegion = {
+              ...region,
+              imageUrl: url,
+              imageNatural: { w: probe.naturalWidth, h: probe.naturalHeight }
+            };
+            console.log(`✅ Device ${deviceIndex} - Region updated:`, {
+              hasImageUrl: !!updatedRegion.imageUrl,
+              hasImageNatural: !!updatedRegion.imageNatural,
+              imageNatural: updatedRegion.imageNatural
+            });
+            return updatedRegion;
+          }
+          return region;
+        });
+        return updated;
+      });
+
+      // 古いURLは画像が読み込まれてからrevoke（タイミングを遅らせる）
+      setTimeout(() => {
+        if (oldUrl && oldUrl !== url) {
+          URL.revokeObjectURL(oldUrl);
+          console.log(`🗑️ Device ${deviceIndex} - Old URL revoked`);
+        }
+      }, 100);
+
       debugLogRef.current.push(`device-${deviceIndex}-upload: ${probe.naturalWidth}x${probe.naturalHeight}`);
     };
+
+    probe.onerror = () => {
+      console.error(`❌ Device ${deviceIndex} - Failed to load image`);
+    };
+
     probe.src = url;
 
     const newKeys = [...imageKeys];
@@ -676,39 +727,54 @@ export default function MultiDeviceMockup() {
 
   // Composite images for each device
   useEffect(() => {
+    console.log('🔄 ==========  Composite useEffect triggered ==========');
+    console.log('Device regions:', deviceRegions);
+    console.log('Image URLs:', imageUrls);
+    console.log('Debug mode:', debugMode);
+
     // デバイスが存在しない場合は早期リターン
-    if (deviceRegions.length === 0) return;
+    if (deviceRegions.length === 0) {
+      console.log('⚠️ No device regions found. Exiting.');
+      return;
+    }
 
     // debugModeを現在の値として取得
     const currentDebugMode = debugMode;
-
-    // Device状態のデバッグログを出力
-    if (currentDebugMode) {
-      console.log('=== All Device Regions Status ===');
-      deviceRegions.forEach((region, index) => {
-        console.log(`Device ${region.deviceIndex}:`, {
-          arrayIndex: index,
-          deviceIndex: region.deviceIndex,
-          isActive: region.isActive,
-          hasImage: !!region.imageUrl,
-          hasRect: !!region.rect,
-          hasComposite: !!region.compositeUrl,
-        });
-      });
-      console.log('===========================');
-    }
 
     let isCancelled = false;
 
     // 実際に存在するデバイスのみを処理
     deviceRegions.forEach((region, deviceIndex) => {
-      if (!region) return;
+      if (!region) {
+        console.log(`⚠️ Device ${deviceIndex}: Region is null`);
+        return;
+      }
+
+      console.log(`🔧 Processing Device ${region.deviceIndex}:`, {
+        hasImageUrl: !!imageUrls[region.deviceIndex],
+        hasHardMaskUrl: !!region.hardMaskUrl,
+        hasImageNatural: !!region.imageNatural,
+        hasRect: !!region.rect,
+        imageUrl: imageUrls[region.deviceIndex]
+      });
 
       (async () => {
         if (isCancelled) return;
         const last = lastMasksRef.current.get(region.deviceIndex as DeviceIndex);
         const imageUrl = imageUrls[region.deviceIndex];
-        if (!last || !region.hardMaskUrl || !imageUrl || !region.imageNatural || !region.rect) {
+
+        console.log(`📋 Device ${region.deviceIndex} Prerequisites Check:`, {
+          last: !!last,
+          hardMaskUrl: !!region.hardMaskUrl,
+          imageUrl: !!imageUrl,
+          imageNatural: !!region.imageNatural,
+          rect: !!region.rect,
+          frameNatural: !!frameNatural
+        });
+
+        // lastMasksRefが空の場合でも、region.rectとframeNaturalがあれば処理を続行
+        if (!region.hardMaskUrl || !imageUrl || !region.imageNatural || !region.rect || !frameNatural) {
+          console.log(`❌ Device ${region.deviceIndex}: Missing prerequisites. Skipping.`);
           if (region.compositeUrl) {
             setDeviceRegions(prev => prev.map((r, idx) =>
               idx === deviceIndex ? { ...r, compositeUrl: null } : r
@@ -717,7 +783,16 @@ export default function MultiDeviceMockup() {
           return;
         }
 
-        const { rw, rh } = last;
+        // lastMasksRefが空の場合、region.rectから計算
+        let rw: number, rh: number;
+        if (last) {
+          ({ rw, rh } = last);
+        } else {
+          // region.rectとframeNaturalから計算
+          rw = Math.round(region.rect.wPct * frameNatural.w);
+          rh = Math.round(region.rect.hPct * frameNatural.h);
+          console.log(`⚠️ Device ${region.deviceIndex}: Using fallback size calculation from rect. rw=${rw}, rh=${rh}`);
+        }
 
         // 表示用のサイズを計算
         let canvasWidth = rw;
@@ -742,55 +817,45 @@ export default function MultiDeviceMockup() {
         const cctx = comp.getContext('2d');
         if (!cctx) return;
 
-        const up = await new Promise<HTMLImageElement>((resolve) => {
+        console.log(`🖼️ Device ${region.deviceIndex}: Loading images...`);
+        const up = await new Promise<HTMLImageElement>((resolve, reject) => {
           const im = new Image();
-          im.onload = () => resolve(im);
+          im.onload = () => {
+            console.log(`✅ Device ${region.deviceIndex}: User image loaded`, {
+              width: im.width,
+              height: im.height,
+              src: im.src.substring(0, 50) + '...'
+            });
+            resolve(im);
+          };
+          im.onerror = (e) => {
+            console.error(`❌ Device ${region.deviceIndex}: Failed to load user image`, e);
+            reject(e);
+          };
           im.src = imageUrl;
         });
-        const mk = await new Promise<HTMLImageElement>((resolve) => {
+        const mk = await new Promise<HTMLImageElement>((resolve, reject) => {
           const im = new Image();
-          im.onload = () => resolve(im);
+          im.onload = () => {
+            console.log(`✅ Device ${region.deviceIndex}: Mask image loaded`, {
+              width: im.width,
+              height: im.height,
+              src: im.src.substring(0, 50) + '...'
+            });
+            resolve(im);
+          };
+          im.onerror = (e) => {
+            console.error(`❌ Device ${region.deviceIndex}: Failed to load mask image`, e);
+            reject(e);
+          };
           im.src = region.hardMaskUrl!;
         });
 
-
-        // デバッグ情報を生成
-        const debugInfo = generateDeviceDebugInfo(
-          selectedFrame?.name || 'unknown',
-          deviceIndex,
-          region.rect,
-          containerSize,
-          region.imageNatural,
-          selectedFrame?.category,
-          'cover' // coverモードのみ使用
-        );
-
-        // 座標変換の詳細ログを出力
-        if (frameNatural && region.rect) {
-          const scale = Math.min(
-            containerSize.w / frameNatural.w,
-            containerSize.h / frameNatural.h
-          );
-          const displayWidth = frameNatural.w * scale;
-          const displayHeight = frameNatural.h * scale;
-          const offsetX = (containerSize.w - displayWidth) / 2;
-          const offsetY = (containerSize.h - displayHeight) / 2;
-
-          const actualPosition = {
-            x: Math.round(offsetX + region.rect.xPct * displayWidth),
-            y: Math.round(offsetY + region.rect.yPct * displayHeight),
-            width: canvasWidth,
-            height: canvasHeight
-          };
-
-          logCoordinateTransform(
-            region.deviceIndex,
-            frameNatural,
-            containerSize,
-            region.rect,
-            actualPosition
-          );
-        }
+        // 統合デバッグログ用の情報を収集開始
+        const deviceDebugLog: any = {
+          deviceIndex: region.deviceIndex,
+          canvasSize: { width: canvasWidth, height: canvasHeight },
+        };
 
         // 画像と検出領域の向きを判定（canvasのサイズを使用）
         const needsRotation = !isOrientationMatched(
@@ -800,28 +865,39 @@ export default function MultiDeviceMockup() {
           canvasHeight
         );
 
-        // デバイスタイプを縦横比で判定（改良版）
-        // 細長い形状（縦横比が極端）はスマートフォンとして認識
-        const aspectRatio = canvasWidth / canvasHeight;
-        const inverseAspectRatio = canvasHeight / canvasWidth;
-        let deviceType = 'unknown';
+        // 改良版デバイスタイプ判定
+        // マスクデータからノッチ/ダイナミックアイランドを検出
+        const tempMaskCanvas = document.createElement('canvas');
+        tempMaskCanvas.width = canvasWidth;
+        tempMaskCanvas.height = canvasHeight;
+        const tempMaskCtx = tempMaskCanvas.getContext('2d');
+        let maskDataForAnalysis: ImageData | undefined;
 
-        // 細長い形状の判定（縦向きまたは横向きに関係なく）
-        const isElongated = aspectRatio > 1.8 || inverseAspectRatio > 1.8;
-
-        if (isElongated) {
-          // 細長い形状はスマートフォン（向きを問わず）
-          deviceType = 'smartphone';
-        } else if (aspectRatio > 1.4) {
-          // 横長で細長くない - ラップトップ/デスクトップ
-          deviceType = 'laptop';
-        } else if (aspectRatio < 0.65) {
-          // 縦長で細長くない - スマートフォン（通常の縦向き）
-          deviceType = 'smartphone';
-        } else {
-          // その他 - タブレットまたは正方形に近い
-          deviceType = 'tablet';
+        if (tempMaskCtx && mk) {
+          tempMaskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
+          maskDataForAnalysis = tempMaskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
         }
+
+        // 新しいデバイス判定ロジックを使用
+        const deviceDetectionResult = detectDeviceTypeFromRegion(
+          region.rect,
+          { w: containerSize.w, h: containerSize.h },
+          maskDataForAnalysis
+        );
+
+        const deviceType: string = deviceDetectionResult.type;
+        const detectionConfidence = deviceDetectionResult.confidence;
+        const hasNotchDetected = deviceDetectionResult.hasNotch;
+        const aspectRatio = canvasWidth / canvasHeight;  // aspectRatio変数を定義
+
+        // デバッグログに詳細情報を追加
+        deviceDebugLog.deviceTypeDetection = {
+          type: deviceType,
+          displayName: getDeviceDisplayName(deviceDetectionResult.type),
+          confidence: `${detectionConfidence.toFixed(1)}%`,
+          hasNotch: hasNotchDetected,
+          aspectRatio: aspectRatio.toFixed(2),
+        };
 
         // マスク処理関連のデバッグログ（デバッグモードがONの時のみ）
         if (currentDebugMode) {
@@ -869,8 +945,8 @@ export default function MultiDeviceMockup() {
         }
 
         // デバッグ情報を保存
-        deviceDebugInfoRef.current[region.deviceIndex] = debugInfo;
-        debugLogRef.current.push(`device-${region.deviceIndex}: ${JSON.stringify(debugInfo)}`);
+        deviceDebugInfoRef.current[region.deviceIndex] = deviceDebugLog;
+        debugLogRef.current.push(`device-${region.deviceIndex}: ${JSON.stringify(deviceDebugLog)}`);
 
         let sourceImage: HTMLImageElement | HTMLCanvasElement = up;
         let sourceWidth = up.width;
@@ -901,19 +977,14 @@ export default function MultiDeviceMockup() {
         }
 
         // 検出領域に画像をフィット（coverモードのみ使用）
-        // デバイスタイプに応じた最適なブリード値を適用
-        const optimalBleed = getOptimalBleedPercent(deviceType);
+        // デバイスタイプに応じた最適なブリード値を適用（新しい判定ロジック使用）
+        const optimalBleed = getOptimalBleedForDevice(deviceDetectionResult.type);
         const fitRect = coverSizeWithBleed(canvasWidth, canvasHeight, sourceWidth, sourceHeight, optimalBleed);
 
-        if (currentDebugMode) {
-          console.log('Fit Result:', {
-            mode: 'cover',
-            originalMaskSize: { rw, rh },
-            canvasSize: { w: canvasWidth, h: canvasHeight },
-            sourceSize: { w: sourceWidth, h: sourceHeight },
-            fitRect
-          });
-        }
+        // デバッグログに追加
+        deviceDebugLog.imageSize = { width: sourceWidth, height: sourceHeight };
+        deviceDebugLog.optimalBleed = `${optimalBleed}%`;
+        deviceDebugLog.fitMode = 'cover';
 
 
         // マスクを使用した正確な画像クリッピング処理
@@ -936,57 +1007,40 @@ export default function MultiDeviceMockup() {
           // 回転が必要な場合（ノッチ位置による補正）
           let rotationAngle = 0;
 
-          // 先にマスクデータを取得してノッチの向きを検出（スマートフォンのみ）
-          if (deviceType === 'smartphone') {
-            console.log(`📱 Starting notch detection for Device ${region.deviceIndex}`);
-            const tempMaskCanvas = document.createElement('canvas');
-            tempMaskCanvas.width = canvasWidth;
-            tempMaskCanvas.height = canvasHeight;
-            const tempMaskCtx = tempMaskCanvas.getContext('2d');
-            if (tempMaskCtx) {
-              tempMaskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
-              const tempMaskData = tempMaskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+          // 新しい向き検出ロジックを使用
+          // デバイスタイプに応じた適切な向きを決定
+          try {
+            rotationAngle = determineDeviceOrientation(
+              deviceDetectionResult.type,
+              maskDataForAnalysis,
+              region.rect
+            );
 
-              // ノッチの位置を検出
-              // この角度は、ノッチを上に持ってくるために必要な画像の回転角度
-              try {
-                rotationAngle = detectNotchOrientation(tempMaskData, canvasWidth, canvasHeight);
-                console.log(`📱 Notch detection completed for Device ${region.deviceIndex}: ${rotationAngle}°`);
-              } catch (error) {
-                console.error(`❌ Error during notch detection for Device ${region.deviceIndex}:`, error);
-                rotationAngle = 0; // フォールバック値
-              }
-
-              // デバッグログ：検出された回転角度
-              if (currentDebugMode) {
-                console.log(`📱 Notch Detection Result for Device ${region.deviceIndex}:`, {
-                  detectedRotation: rotationAngle,
-                  explanation: rotationAngle === 0 ? 'Notch is at top - no rotation needed' :
-                               rotationAngle === 180 ? 'Notch is at bottom - rotate 180°' :
-                               rotationAngle === 90 ? 'Notch is on left - rotate 90° clockwise' :
-                               rotationAngle === -90 ? 'Notch is on right - rotate 90° counter-clockwise' :
-                               'Custom rotation angle'
-                });
-              }
-
-              if (currentDebugMode) {
-                console.log(`🔄 Device ${region.deviceIndex} Orientation Analysis:`, {
-                  detectedRotation: rotationAngle,
-                  deviceType: deviceType,
-                  deviceIndex: region.deviceIndex,
-                  canvasSize: { width: canvasWidth, height: canvasHeight },
-                  imageSize: { width: sourceWidth, height: sourceHeight },
-                  optimalBleed: optimalBleed,
-                  reason: rotationAngle !== 0 ? 'Notch/Dynamic Island position correction' : 'No rotation needed'
-                });
-              }
-            }
+            deviceDebugLog.orientationDetection = {
+              deviceType: deviceDetectionResult.type,
+              rotationAngle: `${rotationAngle}°`,
+              method: deviceDetectionResult.type === 'smartphone' ? 'Notch detection' :
+                      deviceDetectionResult.type === 'laptop' ? 'Fixed landscape' :
+                      deviceDetectionResult.type === 'tablet' ? 'Aspect ratio based' :
+                      'Default',
+              explanation: rotationAngle === 0 ? 'No rotation needed' :
+                          rotationAngle === 180 ? 'Rotate 180°' :
+                          rotationAngle === 90 ? 'Rotate 90° clockwise' :
+                          rotationAngle === -90 ? 'Rotate 90° counter-clockwise' :
+                          'Custom rotation'
+            };
+          } catch (error) {
+            console.error(`❌ Error during orientation detection for Device ${region.deviceIndex}:`, error);
+            rotationAngle = 0;
+            deviceDebugLog.orientationDetection = {
+              error: String(error),
+              rotationAngle: '0° (fallback)'
+            };
           }
 
           // 回転処理
           if (rotationAngle !== 0) {
-            console.log(`🔄 Applying rotation ${rotationAngle}° to device ${region.deviceIndex}`);
-
+            console.log(`🔄 Device ${region.deviceIndex}: Applying rotation ${rotationAngle}°`);
             // キャンバスの中心を基準に回転
             const centerX = canvasWidth / 2;
             const centerY = canvasHeight / 2;
@@ -999,24 +1053,34 @@ export default function MultiDeviceMockup() {
             const absAngle = Math.abs(rotationAngle);
 
             if (absAngle === 90 || absAngle === 270) {
-              // 90度または270度の場合、幅と高さを入れ替えて計算
-              // デバイスの縦横とソース画像の縦横を合わせる
               const rotatedFitRect = coverSizeWithBleed(canvasWidth, canvasHeight, sourceHeight, sourceWidth, optimalBleed);
-              console.log(`📐 90/270° rotation fit rect:`, rotatedFitRect);
               tempImageCtx.drawImage(sourceImage, rotatedFitRect.left, rotatedFitRect.top, rotatedFitRect.w, rotatedFitRect.h);
+              deviceDebugLog.imageRotation = {
+                applied: true,
+                angle: `${rotationAngle}°`,
+                fitRect: rotatedFitRect
+              };
             } else if (absAngle === 180) {
-              // 180度回転の場合、そのまま描画（上下反転）
-              console.log(`📐 180° rotation using normal fit rect:`, fitRect);
               tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+              deviceDebugLog.imageRotation = {
+                applied: true,
+                angle: '180°',
+                fitRect: fitRect
+              };
             } else {
-              // その他の角度（通常はないが念のため）
-              console.log(`📐 Custom angle ${rotationAngle}° using normal fit rect:`, fitRect);
               tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+              deviceDebugLog.imageRotation = {
+                applied: true,
+                angle: `${rotationAngle}° (custom)`,
+                fitRect: fitRect
+              };
             }
           } else {
-            // 回転なしの場合、通常描画
-            console.log(`📐 No rotation, using normal fit rect:`, fitRect);
             tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
+            deviceDebugLog.imageRotation = {
+              applied: false,
+              reason: 'No rotation needed'
+            };
           }
 
           tempImageCtx.restore();
@@ -1031,10 +1095,13 @@ export default function MultiDeviceMockup() {
             }
           }
 
+          deviceDebugLog.imageDrawing = {
+            success: hasImagePixels,
+            status: hasImagePixels ? 'Image drawn successfully' : 'No image pixels detected'
+          };
+
           if (!hasImagePixels) {
             console.error(`❌ Device ${region.deviceIndex}: No image pixels in tempImageCanvas after drawing!`);
-          } else if (currentDebugMode) {
-            console.log(`✅ Device ${region.deviceIndex}: Image successfully drawn to tempImageCanvas`);
           }
 
           // ステップ2: マスクを準備（フェザリング処理も含む）
@@ -1056,30 +1123,27 @@ export default function MultiDeviceMockup() {
 
             // マスクを内側に5px拡張（白い隙間を覆うため）
             const expandPixels = 5;
-            console.log(`🎨 Calling expandMask for Device ${region.deviceIndex} (${deviceType})`);
 
             let expandedMaskData;
             try {
               expandedMaskData = expandMask(maskData, expandPixels);
+              if (!expandedMaskData || !expandedMaskData.data) {
+                throw new Error('Invalid mask data returned');
+              }
+              deviceDebugLog.maskExpansion = {
+                success: true,
+                expandPixels: expandPixels,
+                originalSize: { width: maskData.width, height: maskData.height },
+                expandedSize: { width: expandedMaskData.width, height: expandedMaskData.height }
+              };
             } catch (error) {
               console.error(`❌ expandMask failed for device ${region.deviceIndex}:`, error);
-              // エラーが発生した場合は元のマスクデータを使用
               expandedMaskData = maskData;
-            }
-
-            // expandedMaskDataが正しく返されているか確認
-            if (!expandedMaskData || !expandedMaskData.data) {
-              console.error(`❌ expandMask returned invalid data for device ${region.deviceIndex}`);
-              // フォールバック: 元のマスクデータを使用
-              expandedMaskData = maskData;
-            }
-
-            if (currentDebugMode) {
-              console.log(`✅ expandMask succeeded for device ${region.deviceIndex}:`, {
-                originalSize: { width: maskData.width, height: maskData.height },
-                expandedSize: { width: expandedMaskData.width, height: expandedMaskData.height },
-                dataLength: expandedMaskData.data.length
-              });
+              deviceDebugLog.maskExpansion = {
+                success: false,
+                error: String(error),
+                fallback: 'Using original mask data'
+              };
             }
 
             maskCtx.putImageData(expandedMaskData, 0, 0);
@@ -1125,17 +1189,16 @@ export default function MultiDeviceMockup() {
               data[i + 2] = 255;
             }
 
-            // デバッグログ出力
-            if (currentDebugMode && blackPixelCount > 0) {
-              console.log(`🕳️ Device ${region.deviceIndex} Notch/Cutout Detection:`, {
+            // ノッチ/カットアウト情報をデバッグログに追加
+            if (blackPixelCount > 0) {
+              deviceDebugLog.maskCutout = {
                 blackPixels: blackPixelCount,
                 whitePixels: whitePixelCount,
                 grayPixels: grayPixelCount,
                 totalPixels: data.length / 4,
                 blackRatio: `${((blackPixelCount / (data.length / 4)) * 100).toFixed(2)}%`,
-                deviceType: deviceType,
-                hasNotch: blackPixelCount > 100 // 100ピクセル以上の黒い部分があればノッチとみなす
-              });
+                hasNotch: blackPixelCount > 100
+              };
             }
 
             // 変換したマスクをキャンバスに戻す
@@ -1166,12 +1229,10 @@ export default function MultiDeviceMockup() {
 
             // 画像を描画
             cctx.drawImage(tempImageCanvas, 0, 0);
-            console.log(`🖼️ Device ${region.deviceIndex}: Drew tempImageCanvas to main canvas`);
 
             // マスクでクリッピング
             cctx.globalCompositeOperation = 'destination-in';
             cctx.drawImage(maskCanvas, 0, 0);
-            console.log(`🎭 Device ${region.deviceIndex}: Applied mask with destination-in`);
             cctx.globalCompositeOperation = 'source-over';
 
             // 画像補間を元に戻す
@@ -1187,50 +1248,51 @@ export default function MultiDeviceMockup() {
               }
             }
 
+            deviceDebugLog.maskApplication = {
+              success: hasFinalPixels,
+              maskSize: { width: mk.width, height: mk.height },
+              feather: `${feather}px`,
+              compositeOperation: 'destination-in',
+              status: hasFinalPixels ? 'Pixels visible' : 'No pixels detected'
+            };
+
             if (!hasFinalPixels) {
-              console.error(`❌ Device ${region.deviceIndex}: No pixels after mask application! Mask may be blocking all pixels.`);
-            } else {
-              console.log(`✅ Device ${region.deviceIndex}: Final canvas has visible pixels`);
+              console.error(`❌ Device ${region.deviceIndex}: No pixels after mask application!`);
             }
           }
-        }
-
-        if (currentDebugMode) {
-          console.log(`🎭 Device ${region.deviceIndex} Mask Applied:`, {
-            maskSize: { width: mk.width, height: mk.height },
-            canvasSize: { width: canvasWidth, height: canvasHeight },
-            imagePosition: fitRect,
-            featherStrength: `${feather}px`,
-            clippingMode: 'destination-in',
-            processOrder: 'image → mask → clip',
-            deviceType: deviceType
-          });
         }
 
         // 最終的な合成結果を確認
         const finalImageData = cctx.getImageData(0, 0, canvasWidth, canvasHeight);
         let hasPixels = false;
         for (let i = 3; i < finalImageData.data.length; i += 4) {
-          if (finalImageData.data[i] > 0) {  // アルファ値が0より大きい
+          if (finalImageData.data[i] > 0) {
             hasPixels = true;
             break;
           }
         }
 
+        deviceDebugLog.finalRendering = {
+          success: hasPixels,
+          status: hasPixels ? 'Image successfully rendered' : 'No visible pixels'
+        };
+
         if (!hasPixels) {
           console.error(`❌ Device ${region.deviceIndex} (${deviceType}): No visible pixels in final canvas!`);
-        } else if (currentDebugMode) {
-          console.log(`✅ Device ${region.deviceIndex} (${deviceType}): Image successfully rendered`);
         }
 
         const compositeUrl = comp.toDataURL('image/png');
 
-        // compositeUrlが正しく生成されているか確認
-        if (!compositeUrl || compositeUrl === 'data:,' || compositeUrl === 'data:image/png;base64,') {
-          console.error(`❌ Device ${region.deviceIndex} (${deviceType}): Failed to generate composite URL`);
-        } else {
-          const base64Length = compositeUrl.length - 'data:image/png;base64,'.length;
-          console.log(`✅ Device ${region.deviceIndex} (${deviceType}): Composite URL generated, base64 length: ${base64Length}`);
+        // compositeURL生成確認
+        const isValidUrl = compositeUrl && compositeUrl !== 'data:,' && compositeUrl !== 'data:image/png;base64,';
+        deviceDebugLog.compositeUrlGeneration = {
+          success: isValidUrl,
+          base64Length: isValidUrl ? compositeUrl.length - 'data:image/png;base64,'.length : 0,
+          status: isValidUrl ? 'URL generated successfully' : 'Failed to generate URL'
+        };
+
+        if (!isValidUrl) {
+          console.error(`❌ Device ${region.deviceIndex}: Failed to generate composite URL`);
         }
 
         // デバッグモードの場合、分析を実行
@@ -1293,14 +1355,22 @@ export default function MultiDeviceMockup() {
                 return updated;
               });
 
-              // 視覚化機能は削除（元のCanvasを変更するため）
-              // デバッグ情報はコンソールとDebugPanelで確認
+              // デバッグログに分析結果を追加
+              deviceDebugLog.whiteMarginAnalysis = {
+                hasWhiteMargin: whiteMarginAnalysis.hasWhiteMargin,
+                marginLocations: whiteMarginAnalysis.marginLocations,
+                whitePixelRatio: `${(whiteMarginAnalysis.whitePixelRatio * 100).toFixed(2)}%`,
+                requiredBleed: `${whiteMarginAnalysis.requiredBleedPercentage}%`,
+                recommendations: whiteMarginAnalysis.recommendations
+              };
 
-              // デバッグログ
-              console.log('🔍 Debug Analysis for Device', region.deviceIndex, {
-                whiteMargin: whiteMarginAnalysis,
-                orientation: orientationAnalysis
-              });
+              deviceDebugLog.deviceOrientationAnalysis = {
+                deviceRotation: `${orientationAnalysis.deviceRotation}°`,
+                notchPosition: orientationAnalysis.notchPosition,
+                recommendedImageRotation: `${orientationAnalysis.recommendedImageRotation}°`,
+                majorAxisAngle: `${orientationAnalysis.majorAxisAngle.toFixed(2)}°`,
+                analysisDetails: orientationAnalysis.analysisDetails
+              };
             }
           }
         }
@@ -1326,13 +1396,24 @@ export default function MultiDeviceMockup() {
         }
 
         if (!isCancelled) {
-          setDeviceRegions(prev => prev.map((r, idx) =>
-            idx === deviceIndex ? { ...r, compositeUrl, displayPosition } : r
-          ));
+          console.log(`🎯 Device ${region.deviceIndex}: Setting composite URL`, {
+            compositeUrl: compositeUrl ? compositeUrl.substring(0, 50) + '...' : null,
+            displayPosition
+          });
+          setDeviceRegions(prev => {
+            const updated = prev.map((r, idx) =>
+              idx === deviceIndex ? { ...r, compositeUrl, displayPosition } : r
+            );
+            console.log(`✅ Device ${region.deviceIndex}: State updated`, updated[deviceIndex]);
+            return updated;
+          });
         }
 
+        // 統合デバッグログを1回だけ出力
         if (currentDebugMode && !isCancelled) {
-          console.log('===========================');
+          console.log(`📊 ===== Device ${region.deviceIndex} Complete Processing Report =====`);
+          console.log(deviceDebugLog);
+          console.log(`===== End of Device ${region.deviceIndex} Report =====`);
         }
       })();
     });
@@ -1340,7 +1421,7 @@ export default function MultiDeviceMockup() {
     return () => {
       isCancelled = true;
     };
-  }, [imageUrls, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, deviceRegions, feather]);
+  }, [imageUrls, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, deviceRegions, feather, debugMode]);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
@@ -1574,10 +1655,12 @@ export default function MultiDeviceMockup() {
                 return areaB - areaA;
               });
 
+            console.log(`🖼️ Rendering ${sortedRegions.length} device images`);
             return sortedRegions.map(({ region, idx }, sortIndex) => {
               // displayPositionが存在する場合はそれを使用、なければ従来の計算方法を使用
               let sx, sy, sw, sh;
               if (region.displayPosition) {
+                console.log(`📍 Device ${region.deviceIndex}: Using displayPosition`, region.displayPosition);
                 sx = region.displayPosition.x;
                 sy = region.displayPosition.y;
                 sw = region.displayPosition.width;
