@@ -41,74 +41,79 @@ export const DeviceCharacteristics = {
 };
 
 /**
- * アスペクト比からデバイス種類を判定（改良版）
+ * アスペクト比と視覚的特徴からデバイス種類を判定（改良版）
+ * device.mdの仕様に基づく視覚的特徴優先の判定
+ * @param width 幅
+ * @param height 高さ
+ * @param hasBlackCutout ノッチ/ダイナミックアイランドの有無
+ * @param hasKeyboard キーボードの有無
  */
 export function detectDeviceType(
   width: number,
   height: number,
-  hasBlackCutout: boolean = false
+  hasBlackCutout: boolean = false,
+  hasKeyboard: boolean = false
 ): DeviceType {
   const aspectRatio = width / height;
 
-  // ノッチ/ダイナミックアイランドがある場合は確実にスマートフォン
-  // ただし、横長の場合はラップトップの可能性が高い
-  if (hasBlackCutout && aspectRatio < 1.3) {
-    console.log('🔍 Black cutout detected + Portrait aspect ratio -> Smartphone');
+  console.log('🔍 Device type detection starting:', {
+    aspectRatio: aspectRatio.toFixed(2),
+    hasBlackCutout,
+    hasKeyboard,
+    width,
+    height
+  });
+
+  // device.mdの判定フローに従った視覚的特徴による優先判定
+
+  // 1. キーボード/水平な板がある → ラップトップ（最優先）
+  if (hasKeyboard) {
+    console.log('✅ Laptop detected: keyboard/horizontal plate found');
+    return 'laptop';
+  }
+
+  // 2. 黒い切り抜き/楕円がある → スマートフォン
+  if (hasBlackCutout) {
+    console.log('✅ Smartphone detected: black cutout/notch found');
     return 'smartphone';
   }
 
-  // 各デバイスタイプとの適合度を計算
-  const scores: Record<DeviceType, number> = {
-    laptop: 0,
-    smartphone: 0,
-    tablet: 0,
-    unknown: 0,
-  };
+  // 3. 視覚的特徴がない場合はアスペクト比による補助判定
+  // device.mdの表に基づく範囲判定
 
-  // アスペクト比による基本スコア
-  for (const [deviceType, chars] of Object.entries(DeviceCharacteristics) as [DeviceType, any][]) {
-    if (deviceType === 'unknown') continue;
-
-    const { aspectRatioRange, typicalAspectRatios } = chars;
-
-    // 範囲内チェック
-    if (aspectRatio >= aspectRatioRange.min && aspectRatio <= aspectRatioRange.max) {
-      scores[deviceType] += 50; // 基本スコア
-
-      // 典型的なアスペクト比との近さをボーナススコアとして追加
-      for (const typical of typicalAspectRatios) {
-        const difference = Math.abs(aspectRatio - typical);
-        if (difference < 0.1) {
-          scores[deviceType] += Math.max(0, 30 * (1 - difference / 0.1));
-        }
-      }
-    }
+  // ラップトップ: 1.3 - 2.0
+  if (aspectRatio >= 1.3 && aspectRatio <= 2.0) {
+    console.log('✅ Laptop detected by aspect ratio:', aspectRatio.toFixed(2));
+    return 'laptop';
   }
 
-  // 特別ルール：極端なアスペクト比
-  if (aspectRatio < 0.5) {
-    scores.smartphone += 30; // 非常に縦長 = スマホの可能性高
-  } else if (aspectRatio > 1.5) {
-    scores.laptop += 40; // 横長 = ラップトップの可能性高（より強いスコア）
-  } else if (aspectRatio > 1.35) {
-    scores.laptop += 25; // やや横長 = ラップトップの可能性
+  // スマートフォン: 0.4 - 0.7
+  if (aspectRatio >= 0.4 && aspectRatio <= 0.7) {
+    console.log('✅ Smartphone detected by aspect ratio:', aspectRatio.toFixed(2));
+    return 'smartphone';
   }
 
-  // 最高スコアのデバイスを返す
-  let maxScore = 0;
-  let detectedType: DeviceType = 'unknown';
-
-  for (const [type, score] of Object.entries(scores) as [DeviceType, number][]) {
-    if (score > maxScore) {
-      maxScore = score;
-      detectedType = type;
-    }
+  // タブレット: 0.7 - 1.3
+  if (aspectRatio > 0.7 && aspectRatio < 1.3) {
+    console.log('✅ Tablet detected by aspect ratio:', aspectRatio.toFixed(2));
+    return 'tablet';
   }
 
-  console.log('📊 Device type detection scores:', scores);
-  console.log(`✅ Detected device type: ${detectedType} (score: ${maxScore})`);
+  // エッジケースの処理
+  if (aspectRatio < 0.4) {
+    // 非常に縦長 → スマートフォンの可能性
+    console.log('✅ Smartphone detected (very tall):', aspectRatio.toFixed(2));
+    return 'smartphone';
+  }
 
-  return detectedType;
+  if (aspectRatio > 2.0) {
+    // 非常に横長 → ラップトップの可能性
+    console.log('✅ Laptop detected (very wide):', aspectRatio.toFixed(2));
+    return 'laptop';
+  }
+
+  console.log('⚠️ Unknown device type, defaulting to tablet');
+  return 'tablet';
 }
 
 /**
@@ -118,18 +123,21 @@ export function detectDeviceTypeFromRegion(
   rect: ScreenRectPct,
   containerSize: { w: number; h: number },
   maskData?: ImageData
-): { type: DeviceType; confidence: number; hasNotch: boolean } {
+): { type: DeviceType; confidence: number; hasNotch: boolean; hasKeyboard: boolean } {
   // 実際のピクセルサイズを計算
   const actualWidth = rect.wPct * containerSize.w;
   const actualHeight = rect.hPct * containerSize.h;
 
-  // マスクデータから黒い切り抜きを検出
+  // マスクデータから視覚的特徴を検出
   let hasNotch = false;
+  let hasKeyboard = false;
+
   if (maskData) {
     hasNotch = detectBlackCutout(maskData);
+    hasKeyboard = detectKeyboard(maskData);
   }
 
-  const type = detectDeviceType(actualWidth, actualHeight, hasNotch);
+  const type = detectDeviceType(actualWidth, actualHeight, hasNotch, hasKeyboard);
 
   // 信頼度を計算（0-100%）
   let confidence = 50; // 基本信頼度
@@ -144,15 +152,90 @@ export function detectDeviceTypeFromRegion(
     const deviation = Math.abs(aspectRatio - center) / (range.max - range.min);
     confidence += (1 - deviation) * 30;
 
-    // ノッチ検出との一致
+    // 視覚的特徴による信頼度ブースト
+    if (type === 'laptop' && hasKeyboard) {
+      confidence += 30; // ラップトップでキーボード検出 = 高信頼度
+    }
     if (type === 'smartphone' && hasNotch) {
-      confidence += 20; // スマホでノッチ検出 = 高信頼度
+      confidence += 30; // スマホでノッチ検出 = 高信頼度
     }
 
     confidence = Math.min(100, Math.max(0, confidence));
   }
 
-  return { type, confidence, hasNotch };
+  console.log('🎯 Device type detection result:', {
+    type,
+    confidence: `${confidence.toFixed(1)}%`,
+    hasNotch,
+    hasKeyboard,
+    aspectRatio: aspectRatio.toFixed(2)
+  });
+
+  return { type, confidence, hasNotch, hasKeyboard };
+}
+
+/**
+ * マスク画像からキーボードの存在を検出（ラップトップ判定用）
+ * ラップトップの場合、画面の下部に黒い横長の領域（キーボード/水平な板）が存在する
+ * device.mdの仕様: 「下部にキーボードまたは水平な板が必ず存在」
+ */
+export function detectKeyboard(maskData: ImageData): boolean {
+  const { data, width, height } = maskData;
+
+  // アスペクト比を確認（横長でない場合はキーボードなし）
+  const aspectRatio = width / height;
+  if (aspectRatio < 1.2) {
+    return false;
+  }
+
+  // 下部25%の領域をチェック（キーボードは画面下にある）
+  const checkStartY = Math.floor(height * 0.75);
+  let blackPixelCount = 0;
+  let totalPixelCount = 0;
+
+  // 中央70%の幅をチェック（キーボードは中央に配置）
+  const checkStartX = Math.floor(width * 0.15);
+  const checkEndX = Math.floor(width * 0.85);
+
+  // 横方向の黒いピクセルの連続性を確認
+  let hasHorizontalBlackStripe = false;
+
+  for (let y = checkStartY; y < height; y++) {
+    let rowBlackCount = 0;
+    for (let x = checkStartX; x < checkEndX; x++) {
+      const idx = (y * width + x) * 4;
+      const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+
+      totalPixelCount++;
+      // 黒いピクセル（輝度80未満に緩和）
+      if (luminance < 80) {
+        blackPixelCount++;
+        rowBlackCount++;
+      }
+    }
+
+    // この行の50%以上が黒い場合、横縞があると判定
+    const rowWidth = checkEndX - checkStartX;
+    if (rowBlackCount > rowWidth * 0.5) {
+      hasHorizontalBlackStripe = true;
+    }
+  }
+
+  // チェック領域の40%以上が黒い、または横縞がある場合、キーボードありと判定
+  const blackRatio = totalPixelCount > 0 ? blackPixelCount / totalPixelCount : 0;
+  const hasKeyboard = blackRatio > 0.4 || hasHorizontalBlackStripe;
+
+  if (hasKeyboard) {
+    console.log('⌨️ Keyboard/horizontal plate detected (laptop feature):', {
+      blackRatio: blackRatio.toFixed(3),
+      blackPixels: blackPixelCount,
+      totalPixels: totalPixelCount,
+      hasHorizontalStripe: hasHorizontalBlackStripe,
+      aspectRatio: aspectRatio.toFixed(2)
+    });
+  }
+
+  return hasKeyboard;
 }
 
 /**
@@ -161,26 +244,29 @@ export function detectDeviceTypeFromRegion(
 export function detectBlackCutout(maskData: ImageData): boolean {
   const { data, width, height } = maskData;
 
-  // アスペクト比を確認（横長の場合はラップトップの可能性が高い）
+  // アスペクト比を確認
   const aspectRatio = width / height;
-  if (aspectRatio > 1.4) {
-    // 横長の場合はノッチなしと判定
+
+  // 横長の場合はノッチなしと判定（ラップトップの可能性）
+  if (aspectRatio > 1.2) {
     return false;
   }
 
-  // 上部10%の領域をチェック（ノッチは通常上部の狭い領域にある）
-  const checkHeight = Math.floor(height * 0.1);
+  // 上部15%の領域をチェック（ノッチは通常上部の狭い領域にある）
+  const checkHeight = Math.floor(height * 0.15);
   let blackPixelCount = 0;
+  let totalPixelCount = 0;
 
-  // 中央60%の幅のみをチェック（ノッチは通常中央にある）
-  const checkStartX = Math.floor(width * 0.2);
-  const checkEndX = Math.floor(width * 0.8);
+  // 中央70%の幅のみをチェック（ノッチは通常中央にある）
+  const checkStartX = Math.floor(width * 0.15);
+  const checkEndX = Math.floor(width * 0.85);
 
   for (let y = 0; y < checkHeight; y++) {
     for (let x = checkStartX; x < checkEndX; x++) {
       const idx = (y * width + x) * 4;
       const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
 
+      totalPixelCount++;
       // 黒いピクセル（輝度30未満）
       if (luminance < 30) {
         blackPixelCount++;
@@ -188,131 +274,147 @@ export function detectBlackCutout(maskData: ImageData): boolean {
     }
   }
 
-  // チェックした領域の5%以上が黒い場合、ノッチありと判定（より厳しい閾値）
-  const checkArea = checkHeight * (checkEndX - checkStartX);
-  const blackRatio = blackPixelCount / checkArea;
-  const hasNotch = blackRatio > 0.05;
+  // チェックした領域の3%以上が黒い場合、ノッチありと判定
+  const blackRatio = totalPixelCount > 0 ? blackPixelCount / totalPixelCount : 0;
+  const hasNotch = blackRatio > 0.03;
 
   if (hasNotch) {
-    console.log('📱 Notch detected:', { blackRatio, aspectRatio });
+    console.log('📱 Notch detected (smartphone feature):', {
+      blackRatio: blackRatio.toFixed(3),
+      aspectRatio: aspectRatio.toFixed(2),
+      blackPixels: blackPixelCount,
+      totalPixels: totalPixelCount
+    });
   }
 
   return hasNotch;
 }
 
 /**
- * デバイスの向きを決定
+ * デバイスの縦方向（矢印方向）を検出
+ * device.mdの仕様に基づく判定
  * @param deviceType デバイス種類
- * @param maskData マスクデータ（ノッチ位置検出用）
- * @param rect デバイス領域
- * @returns 推奨される画像の回転角度
+ * @param deviceAspectRatio デバイス領域のアスペクト比
+ * @returns 矢印の方向（'up', 'right', 'diagonal-up'）
  */
-export function determineDeviceOrientation(
+export function detectDeviceVerticalDirection(
   deviceType: DeviceType,
-  maskData?: ImageData,
-  rect?: ScreenRectPct
-): number {
+  deviceAspectRatio: number
+): 'up' | 'right' | 'diagonal-up' {
+  console.log('🧭 Detecting device vertical direction:', {
+    deviceType,
+    deviceAspectRatio: deviceAspectRatio.toFixed(2)
+  });
+
   switch (deviceType) {
     case 'laptop':
-      // ラップトップは回転不要（元画像が正しい向き）
-      return 0;
+      // ラップトップ：矢印は常に上向き（↑）
+      return 'up';
 
     case 'smartphone':
-      // スマートフォンはノッチの位置で判定
-      if (maskData) {
-        return detectNotchOrientation(maskData);
+      if (deviceAspectRatio < 1.0) {
+        // 縦向きの場合：矢印は上向き（↑）
+        return 'up';
+      } else {
+        // 横向きの場合：矢印は横向き（→）
+        return 'right';
       }
-      return 0; // デフォルトは縦向き
 
     case 'tablet':
-      // タブレットは領域の形状で判定
-      if (rect) {
-        const aspectRatio = rect.wPct / rect.hPct;
-        if (aspectRatio > 1) {
-          // 横長の場合は横向き
-          return 90;
-        }
+      if (deviceAspectRatio < 0.9) {
+        // 縦向きの場合：矢印は上向き（↑）
+        return 'up';
+      } else if (deviceAspectRatio > 1.1) {
+        // 横向きの場合：矢印は斜め上向き（↗）
+        return 'diagonal-up';
+      } else {
+        // ほぼ正方形：デフォルトは上向き
+        return 'up';
       }
-      return 0; // デフォルトは縦向き
 
     default:
-      return 0;
+      return 'up';
   }
 }
 
 /**
- * ノッチの位置から画像の回転角度を検出
+ * デバイスの向きを決定（改良版）
+ * デバイスの縦方向に合わせて画像を適切に配置
+ * @param deviceType デバイス種類
+ * @param maskData マスクデータ（ノッチ位置検出用）
+ * @param rect デバイス領域
+ * @param imageNatural ユーザーがアップロードした画像のサイズ
+ * @returns 推奨される画像の回転角度
  */
-function detectNotchOrientation(maskData: ImageData): number {
-  const { data, width, height } = maskData;
-
-  // 各辺の黒いピクセル密度を計算
-  const edgeDepth = 20;
-  const edges = {
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0
-  };
-
-  // 上端
-  for (let y = 0; y < Math.min(edgeDepth, height); y++) {
-    for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4;
-      const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-      if (lum < 30) edges.top++;
-    }
+export function determineDeviceOrientation(
+  deviceType: DeviceType,
+  _maskData?: ImageData,
+  rect?: ScreenRectPct,
+  imageNatural?: { w: number; h: number }
+): number {
+  // デバイス領域のアスペクト比を計算
+  let deviceAspectRatio = 1;
+  if (rect) {
+    deviceAspectRatio = rect.wPct / rect.hPct;
   }
 
-  // 下端
-  for (let y = Math.max(0, height - edgeDepth); y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4;
-      const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-      if (lum < 30) edges.bottom++;
-    }
+  // アップロード画像のアスペクト比を計算
+  let imageAspectRatio = 1;
+  if (imageNatural) {
+    imageAspectRatio = imageNatural.w / imageNatural.h;
   }
 
-  // 左端
-  for (let x = 0; x < Math.min(edgeDepth, width); x++) {
-    for (let y = 0; y < height; y++) {
-      const idx = (y * width + x) * 4;
-      const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-      if (lum < 30) edges.left++;
-    }
-  }
+  // デバイスの縦方向を検出
+  const verticalDirection = detectDeviceVerticalDirection(deviceType, deviceAspectRatio);
 
-  // 右端
-  for (let x = Math.max(0, width - edgeDepth); x < width; x++) {
-    for (let y = 0; y < height; y++) {
-      const idx = (y * width + x) * 4;
-      const lum = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
-      if (lum < 30) edges.right++;
-    }
-  }
-
-  // 最も黒いピクセルが多い辺がノッチのある辺
-  const maxEdge = Math.max(edges.top, edges.bottom, edges.left, edges.right);
-
-  // デバッグ用のログ
-  console.log('🔄 Edge detection:', {
-    top: edges.top,
-    bottom: edges.bottom,
-    left: edges.left,
-    right: edges.right,
-    maxEdge: maxEdge
+  console.log('🔄 Orientation detection:', {
+    deviceType,
+    deviceAspectRatio: deviceAspectRatio.toFixed(2),
+    imageAspectRatio: imageNatural ? imageAspectRatio.toFixed(2) : 'N/A',
+    verticalDirection
   });
 
-  if (maxEdge === edges.top) {
-    return 0; // ノッチが上 = 回転不要
-  } else if (maxEdge === edges.bottom) {
-    return 180; // ノッチが下 = 180度回転
-  } else if (maxEdge === edges.left) {
-    // ノッチが左側にある場合、画像を180度回転させる
-    return 180; // 180度回転に変更
-  } else {
-    // ノッチが右側にある場合も180度回転
-    return 180; // 180度回転に変更
+  // 縦方向に基づいて画像の回転を決定
+  switch (verticalDirection) {
+    case 'up':
+      // 矢印が上向き：デバイスは縦向き
+      if (deviceAspectRatio < 1.0) {
+        // デバイスが縦長
+        if (imageNatural && imageAspectRatio > 1.2) {
+          // 画像が横長 → 90度回転して縦にする
+          console.log('🔄 Rotating landscape image 90° to match vertical device');
+          return 90;
+        }
+      } else {
+        // デバイスが横長（ラップトップ等）
+        if (imageNatural && imageAspectRatio < 0.8) {
+          // 画像が縦長 → 90度回転して横にする
+          console.log('🔄 Rotating portrait image 90° to match horizontal device');
+          return 90;
+        }
+      }
+      return 0;
+
+    case 'right':
+      // 矢印が横向き：デバイスは横向き（横向きスマホ）
+      if (imageNatural && imageAspectRatio < 0.8) {
+        // 画像が縦長 → 90度回転して横にする
+        console.log('🔄 Rotating portrait image 90° to match horizontal smartphone');
+        return 90;
+      }
+      return 0;
+
+    case 'diagonal-up':
+      // 矢印が斜め上：デバイスは横向き（横向きタブレット）
+      if (imageNatural && imageAspectRatio < 0.9) {
+        // 画像が縦長 → 90度回転して横にする
+        console.log('🔄 Rotating portrait image 90° to match horizontal tablet');
+        return 90;
+      }
+      return 0;
+
+    default:
+      return 0;
   }
 }
 

@@ -28,6 +28,7 @@ import {
 import {
   detectDeviceType,
   detectDeviceTypeFromRegion,
+  detectDeviceVerticalDirection,
   determineDeviceOrientation,
   getDeviceDisplayName,
   getOptimalBleedForDevice,
@@ -271,9 +272,14 @@ export default function MultiDeviceMockup() {
 
     const url = URL.createObjectURL(file);
 
-    // 古いURLは後でrevokeする（すぐにrevokeしない）
-    const oldUrl = imageUrls[deviceIndex];
+    // 古いURLを取得
+    let oldUrl: string | null = null;
+    const currentRegion = deviceRegions[deviceIndex];
+    if (currentRegion && currentRegion.imageUrl) {
+      oldUrl = currentRegion.imageUrl;
+    }
 
+    // imageUrls配列も更新（互換性のため）
     const newUrls = [...imageUrls];
     newUrls[deviceIndex] = url;
     setImageUrls(newUrls);
@@ -729,7 +735,6 @@ export default function MultiDeviceMockup() {
   useEffect(() => {
     console.log('🔄 ==========  Composite useEffect triggered ==========');
     console.log('Device regions:', deviceRegions);
-    console.log('Image URLs:', imageUrls);
     console.log('Debug mode:', debugMode);
 
     // デバイスが存在しない場合は早期リターン
@@ -750,18 +755,20 @@ export default function MultiDeviceMockup() {
         return;
       }
 
+      // deviceRegion内のimageUrlを使用
+      const imageUrl = region.imageUrl;
+
       console.log(`🔧 Processing Device ${region.deviceIndex}:`, {
-        hasImageUrl: !!imageUrls[region.deviceIndex],
+        hasImageUrl: !!imageUrl,
         hasHardMaskUrl: !!region.hardMaskUrl,
         hasImageNatural: !!region.imageNatural,
         hasRect: !!region.rect,
-        imageUrl: imageUrls[region.deviceIndex]
+        imageUrl: imageUrl
       });
 
       (async () => {
         if (isCancelled) return;
         const last = lastMasksRef.current.get(region.deviceIndex as DeviceIndex);
-        const imageUrl = imageUrls[region.deviceIndex];
 
         console.log(`📋 Device ${region.deviceIndex} Prerequisites Check:`, {
           last: !!last,
@@ -857,20 +864,12 @@ export default function MultiDeviceMockup() {
           canvasSize: { width: canvasWidth, height: canvasHeight },
         };
 
-        // 画像と検出領域の向きを判定（canvasのサイズを使用）
-        const needsRotation = !isOrientationMatched(
-          up.width,
-          up.height,
-          canvasWidth,
-          canvasHeight
-        );
-
         // 改良版デバイスタイプ判定
         // マスクデータからノッチ/ダイナミックアイランドを検出
         const tempMaskCanvas = document.createElement('canvas');
         tempMaskCanvas.width = canvasWidth;
         tempMaskCanvas.height = canvasHeight;
-        const tempMaskCtx = tempMaskCanvas.getContext('2d');
+        const tempMaskCtx = tempMaskCanvas.getContext('2d', { willReadFrequently: true });
         let maskDataForAnalysis: ImageData | undefined;
 
         if (tempMaskCtx && mk) {
@@ -888,7 +887,17 @@ export default function MultiDeviceMockup() {
         const deviceType: string = deviceDetectionResult.type;
         const detectionConfidence = deviceDetectionResult.confidence;
         const hasNotchDetected = deviceDetectionResult.hasNotch;
+        const hasKeyboardDetected = deviceDetectionResult.hasKeyboard;
         const aspectRatio = canvasWidth / canvasHeight;  // aspectRatio変数を定義
+
+        // デバイスの縦方向（矢印の向き）を検出
+        const deviceAspectRatio = region.rect.wPct / region.rect.hPct;
+        const verticalDirection = detectDeviceVerticalDirection(
+          deviceDetectionResult.type,
+          deviceAspectRatio
+        );
+        const verticalArrow = verticalDirection === 'up' ? '↑' :
+                              verticalDirection === 'right' ? '→' : '↗';
 
         // デバッグログに詳細情報を追加
         deviceDebugLog.deviceTypeDetection = {
@@ -896,7 +905,10 @@ export default function MultiDeviceMockup() {
           displayName: getDeviceDisplayName(deviceDetectionResult.type),
           confidence: `${detectionConfidence.toFixed(1)}%`,
           hasNotch: hasNotchDetected,
+          hasKeyboard: hasKeyboardDetected,
           aspectRatio: aspectRatio.toFixed(2),
+          visualFeatures: hasKeyboardDetected ? '⌨️ Keyboard detected' : hasNotchDetected ? '📱 Notch detected' : 'None',
+          verticalDirection: `${verticalArrow} (${verticalDirection})`
         };
 
         // マスク処理関連のデバッグログ（デバッグモードがONの時のみ）
@@ -948,33 +960,10 @@ export default function MultiDeviceMockup() {
         deviceDebugInfoRef.current[region.deviceIndex] = deviceDebugLog;
         debugLogRef.current.push(`device-${region.deviceIndex}: ${JSON.stringify(deviceDebugLog)}`);
 
+        // ソース画像のサイズを保持
         let sourceImage: HTMLImageElement | HTMLCanvasElement = up;
         let sourceWidth = up.width;
         let sourceHeight = up.height;
-
-        // 必要に応じて画像を回転
-        if (needsRotation) {
-          const rotCanvas = document.createElement('canvas');
-          const rotCtx = rotCanvas.getContext('2d');
-          if (rotCtx) {
-            // 90度回転後のサイズ設定
-            rotCanvas.width = up.height;
-            rotCanvas.height = up.width;
-
-            // 中心を移動して回転
-            rotCtx.translate(rotCanvas.width / 2, rotCanvas.height / 2);
-            rotCtx.rotate(Math.PI / 2);
-            rotCtx.drawImage(up, -up.width / 2, -up.height / 2);
-
-            sourceImage = rotCanvas;
-            sourceWidth = rotCanvas.width;
-            sourceHeight = rotCanvas.height;
-
-            if (currentDebugMode) {
-              console.log('Image rotated 90°, new size:', { w: sourceWidth, h: sourceHeight });
-            }
-          }
-        }
 
         // 検出領域に画像をフィット（coverモードのみ使用）
         // デバイスタイプに応じた最適なブリード値を適用（新しい判定ロジック使用）
@@ -1013,15 +1002,18 @@ export default function MultiDeviceMockup() {
             rotationAngle = determineDeviceOrientation(
               deviceDetectionResult.type,
               maskDataForAnalysis,
-              region.rect
+              region.rect,
+              region.imageNatural ?? undefined
             );
 
             deviceDebugLog.orientationDetection = {
               deviceType: deviceDetectionResult.type,
               rotationAngle: `${rotationAngle}°`,
-              method: deviceDetectionResult.type === 'smartphone' ? 'Notch detection' :
-                      deviceDetectionResult.type === 'laptop' ? 'Fixed landscape' :
-                      deviceDetectionResult.type === 'tablet' ? 'Aspect ratio based' :
+              imageAspectRatio: region.imageNatural ? (region.imageNatural.w / region.imageNatural.h).toFixed(2) : 'N/A',
+              deviceAspectRatio: (region.rect.wPct / region.rect.hPct).toFixed(2),
+              method: deviceDetectionResult.type === 'smartphone' ? 'Portrait orientation check' :
+                      deviceDetectionResult.type === 'laptop' ? 'Landscape orientation check' :
+                      deviceDetectionResult.type === 'tablet' ? 'Aspect ratio matching' :
                       'Default',
               explanation: rotationAngle === 0 ? 'No rotation needed' :
                           rotationAngle === 180 ? 'Rotate 180°' :
@@ -1421,7 +1413,7 @@ export default function MultiDeviceMockup() {
     return () => {
       isCancelled = true;
     };
-  }, [imageUrls, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, deviceRegions, feather, debugMode]);
+  }, [deviceRegions, selectedFrame?.id, containerSize.w, containerSize.h, frameNatural?.w, frameNatural?.h, feather]);
 
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
