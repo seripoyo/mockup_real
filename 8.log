@@ -1,0 +1,29 @@
+chunk-HCIN4FJ4.js?v=48f22f73:21607 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+MultiDeviceMockup.tsx:730 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:731 Device regions: []
+MultiDeviceMockup.tsx:732 Image URLs: (3) [null, null, null]
+MultiDeviceMockup.tsx:733 Debug mode: false
+MultiDeviceMockup.tsx:737 ⚠️ No device regions found. Exiting.
+MultiDeviceMockup.tsx:730 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:731 Device regions: []
+MultiDeviceMockup.tsx:732 Image URLs: (3) [null, null, null]
+MultiDeviceMockup.tsx:733 Debug mode: false
+MultiDeviceMockup.tsx:737 ⚠️ No device regions found. Exiting.
+MultiDeviceMockup.tsx:730 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:731 Device regions: []
+MultiDeviceMockup.tsx:732 Image URLs: (3) [null, null, null]
+MultiDeviceMockup.tsx:733 Debug mode: false
+MultiDeviceMockup.tsx:737 ⚠️ No device regions found. Exiting.
+MultiDeviceMockup.tsx:730 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:731 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:732 Image URLs: (3) [null, null, null]
+MultiDeviceMockup.tsx:733 Debug mode: false
+MultiDeviceMockup.tsx:753 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:766 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:777 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:753 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:766 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:777 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:753 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:766 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:777 ❌ Device 2: Missing prerequisites. Skipping.
