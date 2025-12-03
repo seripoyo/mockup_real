@@ -58,10 +58,15 @@ function expandMask(imageData: ImageData, expandPixels: number): ImageData {
   const output = new ImageData(width, height);
   const dst = output.data;
 
+  console.log(`🔧 expandMask called: ${width}x${height}, expanding by ${expandPixels}px`);
+
   // 初期化：元データをコピー
   for (let i = 0; i < src.length; i++) {
     dst[i] = src[i];
   }
+
+  let expandedPixelCount = 0;
+  let whitePixelCount = 0;
 
   // 拡張処理：白い領域を広げる
   for (let y = 0; y < height; y++) {
@@ -71,6 +76,7 @@ function expandMask(imageData: ImageData, expandPixels: number): ImageData {
 
       // 白いピクセルの場合、周囲を白くする
       if (luminance > 200) {
+        whitePixelCount++;
         for (let dy = -expandPixels; dy <= expandPixels; dy++) {
           for (let dx = -expandPixels; dx <= expandPixels; dx++) {
             const nx = x + dx;
@@ -85,6 +91,10 @@ function expandMask(imageData: ImageData, expandPixels: number): ImageData {
                 // 元が黒でない場合のみ白くする（黒フレームは保護）
                 const origLum = (src[nidx] + src[nidx + 1] + src[nidx + 2]) / 3;
                 if (origLum > 50) {  // 完全に黒い部分は拡張しない
+                  // 元のピクセルが白でない場合のみカウント
+                  if (dst[nidx] !== 255 || dst[nidx + 1] !== 255 || dst[nidx + 2] !== 255) {
+                    expandedPixelCount++;
+                  }
                   dst[nidx] = 255;
                   dst[nidx + 1] = 255;
                   dst[nidx + 2] = 255;
@@ -97,6 +107,8 @@ function expandMask(imageData: ImageData, expandPixels: number): ImageData {
       }
     }
   }
+
+  console.log(`🔧 expandMask complete: ${whitePixelCount} white pixels found, ${expandedPixelCount} pixels expanded`);
 
   return output;
 }
@@ -652,8 +664,8 @@ export default function MultiDeviceMockup() {
 
   useEffect(() => {
     lastMasksRef.current.forEach((maskData, deviceIndex) => {
-      const { rw, rh, mask } = maskData;
-      const url = maskToDataUrl(mask, rw, rh, feather);
+      const { rw: maskWidth, rh: maskHeight, mask } = maskData;
+      const url = maskToDataUrl(mask, maskWidth, maskHeight, feather);
       if (url) {
         setDeviceRegions(prev => prev.map((region, idx) =>
           idx === deviceIndex ? { ...region, maskDataUrl: url } : region
@@ -926,6 +938,7 @@ export default function MultiDeviceMockup() {
 
           // 先にマスクデータを取得してノッチの向きを検出（スマートフォンのみ）
           if (deviceType === 'smartphone') {
+            console.log(`📱 Starting notch detection for Device ${region.deviceIndex}`);
             const tempMaskCanvas = document.createElement('canvas');
             tempMaskCanvas.width = canvasWidth;
             tempMaskCanvas.height = canvasHeight;
@@ -935,31 +948,25 @@ export default function MultiDeviceMockup() {
               const tempMaskData = tempMaskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
 
               // ノッチの位置を検出
-              rotationAngle = detectNotchOrientation(tempMaskData, canvasWidth, canvasHeight);
-
-              // スマートフォンの向きに応じた追加補正
-              // 横向きのスマートフォンの場合、画像も横向きにする必要がある
-              const isHorizontalPhone = canvasWidth > canvasHeight;
-              const isHorizontalImage = sourceWidth > sourceHeight;
-
-              if (isHorizontalPhone && !isHorizontalImage) {
-                // デバイスは横向きだが画像は縦向き → 90度回転が必要
-                rotationAngle = rotationAngle !== 0 ? rotationAngle : 90;
-              } else if (!isHorizontalPhone && isHorizontalImage) {
-                // デバイスは縦向きだが画像は横向き → 90度回転が必要
-                rotationAngle = rotationAngle !== 0 ? rotationAngle : -90;
+              // この角度は、ノッチを上に持ってくるために必要な画像の回転角度
+              try {
+                rotationAngle = detectNotchOrientation(tempMaskData, canvasWidth, canvasHeight);
+                console.log(`📱 Notch detection completed for Device ${region.deviceIndex}: ${rotationAngle}°`);
+              } catch (error) {
+                console.error(`❌ Error during notch detection for Device ${region.deviceIndex}:`, error);
+                rotationAngle = 0; // フォールバック値
               }
 
-              // 斜め配置の場合の特別処理
-              if (Math.abs(rotationAngle) === 45 || Math.abs(rotationAngle) === 135) {
-                // 斜め配置の場合、デバイスの主軸に合わせて画像を回転
-                if (isHorizontalPhone) {
-                  // 横向きスマホの斜め配置
-                  rotationAngle = isHorizontalImage ? rotationAngle : rotationAngle + 90;
-                } else {
-                  // 縦向きスマホの斜め配置
-                  rotationAngle = isHorizontalImage ? rotationAngle - 90 : rotationAngle;
-                }
+              // デバッグログ：検出された回転角度
+              if (currentDebugMode) {
+                console.log(`📱 Notch Detection Result for Device ${region.deviceIndex}:`, {
+                  detectedRotation: rotationAngle,
+                  explanation: rotationAngle === 0 ? 'Notch is at top - no rotation needed' :
+                               rotationAngle === 180 ? 'Notch is at bottom - rotate 180°' :
+                               rotationAngle === 90 ? 'Notch is on left - rotate 90° clockwise' :
+                               rotationAngle === -90 ? 'Notch is on right - rotate 90° counter-clockwise' :
+                               'Custom rotation angle'
+                });
               }
 
               if (currentDebugMode) {
@@ -969,8 +976,6 @@ export default function MultiDeviceMockup() {
                   deviceIndex: region.deviceIndex,
                   canvasSize: { width: canvasWidth, height: canvasHeight },
                   imageSize: { width: sourceWidth, height: sourceHeight },
-                  isHorizontalPhone,
-                  isHorizontalImage,
                   optimalBleed: optimalBleed,
                   reason: rotationAngle !== 0 ? 'Notch/Dynamic Island position correction' : 'No rotation needed'
                 });
@@ -980,6 +985,8 @@ export default function MultiDeviceMockup() {
 
           // 回転処理
           if (rotationAngle !== 0) {
+            console.log(`🔄 Applying rotation ${rotationAngle}° to device ${region.deviceIndex}`);
+
             // キャンバスの中心を基準に回転
             const centerX = canvasWidth / 2;
             const centerY = canvasHeight / 2;
@@ -988,34 +995,47 @@ export default function MultiDeviceMockup() {
             tempImageCtx.rotate((rotationAngle * Math.PI) / 180);
             tempImageCtx.translate(-centerX, -centerY);
 
-            // 回転後の画像を調整（必要に応じてサイズを変更）
-            // 斜め回転の場合も考慮
+            // 回転後の画像を調整
             const absAngle = Math.abs(rotationAngle);
 
             if (absAngle === 90 || absAngle === 270) {
               // 90度または270度の場合、幅と高さを入れ替えて計算
-              const adjustedFitRect = coverSizeWithBleed(canvasWidth, canvasHeight, sourceHeight, sourceWidth, optimalBleed);
-              tempImageCtx.drawImage(sourceImage, adjustedFitRect.left, adjustedFitRect.top, adjustedFitRect.w, adjustedFitRect.h);
-            } else if (absAngle === 45 || absAngle === 135) {
-              // 斜め回転の場合、画像を少し拡大してフィット
-              const scaleFactor = 1.2; // 斜めの場合は少し大きくする
-              const adjustedFitRect = {
-                w: fitRect.w * scaleFactor,
-                h: fitRect.h * scaleFactor,
-                left: (canvasWidth - fitRect.w * scaleFactor) / 2,
-                top: (canvasHeight - fitRect.h * scaleFactor) / 2
-              };
-              tempImageCtx.drawImage(sourceImage, adjustedFitRect.left, adjustedFitRect.top, adjustedFitRect.w, adjustedFitRect.h);
+              // デバイスの縦横とソース画像の縦横を合わせる
+              const rotatedFitRect = coverSizeWithBleed(canvasWidth, canvasHeight, sourceHeight, sourceWidth, optimalBleed);
+              console.log(`📐 90/270° rotation fit rect:`, rotatedFitRect);
+              tempImageCtx.drawImage(sourceImage, rotatedFitRect.left, rotatedFitRect.top, rotatedFitRect.w, rotatedFitRect.h);
+            } else if (absAngle === 180) {
+              // 180度回転の場合、そのまま描画（上下反転）
+              console.log(`📐 180° rotation using normal fit rect:`, fitRect);
+              tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
             } else {
-              // 0度または180度の場合、通常通り
+              // その他の角度（通常はないが念のため）
+              console.log(`📐 Custom angle ${rotationAngle}° using normal fit rect:`, fitRect);
               tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
             }
           } else {
             // 回転なしの場合、通常描画
+            console.log(`📐 No rotation, using normal fit rect:`, fitRect);
             tempImageCtx.drawImage(sourceImage, fitRect.left, fitRect.top, fitRect.w, fitRect.h);
           }
 
           tempImageCtx.restore();
+
+          // 描画後の確認
+          const tempImageData = tempImageCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+          let hasImagePixels = false;
+          for (let i = 3; i < tempImageData.data.length; i += 4) {
+            if (tempImageData.data[i] > 0) {
+              hasImagePixels = true;
+              break;
+            }
+          }
+
+          if (!hasImagePixels) {
+            console.error(`❌ Device ${region.deviceIndex}: No image pixels in tempImageCanvas after drawing!`);
+          } else if (currentDebugMode) {
+            console.log(`✅ Device ${region.deviceIndex}: Image successfully drawn to tempImageCanvas`);
+          }
 
           // ステップ2: マスクを準備（フェザリング処理も含む）
           const maskCanvas = document.createElement('canvas');
@@ -1036,7 +1056,32 @@ export default function MultiDeviceMockup() {
 
             // マスクを内側に5px拡張（白い隙間を覆うため）
             const expandPixels = 5;
-            const expandedMaskData = expandMask(maskData, expandPixels);
+            console.log(`🎨 Calling expandMask for Device ${region.deviceIndex} (${deviceType})`);
+
+            let expandedMaskData;
+            try {
+              expandedMaskData = expandMask(maskData, expandPixels);
+            } catch (error) {
+              console.error(`❌ expandMask failed for device ${region.deviceIndex}:`, error);
+              // エラーが発生した場合は元のマスクデータを使用
+              expandedMaskData = maskData;
+            }
+
+            // expandedMaskDataが正しく返されているか確認
+            if (!expandedMaskData || !expandedMaskData.data) {
+              console.error(`❌ expandMask returned invalid data for device ${region.deviceIndex}`);
+              // フォールバック: 元のマスクデータを使用
+              expandedMaskData = maskData;
+            }
+
+            if (currentDebugMode) {
+              console.log(`✅ expandMask succeeded for device ${region.deviceIndex}:`, {
+                originalSize: { width: maskData.width, height: maskData.height },
+                expandedSize: { width: expandedMaskData.width, height: expandedMaskData.height },
+                dataLength: expandedMaskData.data.length
+              });
+            }
+
             maskCtx.putImageData(expandedMaskData, 0, 0);
 
             // 拡張後のマスクデータを再取得して黒い部分を透明に変換
@@ -1121,14 +1166,32 @@ export default function MultiDeviceMockup() {
 
             // 画像を描画
             cctx.drawImage(tempImageCanvas, 0, 0);
+            console.log(`🖼️ Device ${region.deviceIndex}: Drew tempImageCanvas to main canvas`);
 
             // マスクでクリッピング
             cctx.globalCompositeOperation = 'destination-in';
             cctx.drawImage(maskCanvas, 0, 0);
+            console.log(`🎭 Device ${region.deviceIndex}: Applied mask with destination-in`);
             cctx.globalCompositeOperation = 'source-over';
 
             // 画像補間を元に戻す
             cctx.imageSmoothingEnabled = true;
+
+            // 最終確認
+            const finalCheckData = cctx.getImageData(0, 0, canvasWidth, canvasHeight);
+            let hasFinalPixels = false;
+            for (let i = 3; i < finalCheckData.data.length; i += 4) {
+              if (finalCheckData.data[i] > 0) {
+                hasFinalPixels = true;
+                break;
+              }
+            }
+
+            if (!hasFinalPixels) {
+              console.error(`❌ Device ${region.deviceIndex}: No pixels after mask application! Mask may be blocking all pixels.`);
+            } else {
+              console.log(`✅ Device ${region.deviceIndex}: Final canvas has visible pixels`);
+            }
           }
         }
 
@@ -1139,11 +1202,36 @@ export default function MultiDeviceMockup() {
             imagePosition: fitRect,
             featherStrength: `${feather}px`,
             clippingMode: 'destination-in',
-            processOrder: 'image → mask → clip'
+            processOrder: 'image → mask → clip',
+            deviceType: deviceType
           });
         }
 
+        // 最終的な合成結果を確認
+        const finalImageData = cctx.getImageData(0, 0, canvasWidth, canvasHeight);
+        let hasPixels = false;
+        for (let i = 3; i < finalImageData.data.length; i += 4) {
+          if (finalImageData.data[i] > 0) {  // アルファ値が0より大きい
+            hasPixels = true;
+            break;
+          }
+        }
+
+        if (!hasPixels) {
+          console.error(`❌ Device ${region.deviceIndex} (${deviceType}): No visible pixels in final canvas!`);
+        } else if (currentDebugMode) {
+          console.log(`✅ Device ${region.deviceIndex} (${deviceType}): Image successfully rendered`);
+        }
+
         const compositeUrl = comp.toDataURL('image/png');
+
+        // compositeUrlが正しく生成されているか確認
+        if (!compositeUrl || compositeUrl === 'data:,' || compositeUrl === 'data:image/png;base64,') {
+          console.error(`❌ Device ${region.deviceIndex} (${deviceType}): Failed to generate composite URL`);
+        } else {
+          const base64Length = compositeUrl.length - 'data:image/png;base64,'.length;
+          console.log(`✅ Device ${region.deviceIndex} (${deviceType}): Composite URL generated, base64 length: ${base64Length}`);
+        }
 
         // デバッグモードの場合、分析を実行
         if (currentDebugMode) {

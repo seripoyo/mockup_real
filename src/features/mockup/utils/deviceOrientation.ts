@@ -214,57 +214,24 @@ export function detectNotchOrientation(
   // 最も近い辺を見つける
   const minDist = Math.min(distFromTop, distFromBottom, distFromLeft, distFromRight);
 
-  // デバイスの傾きを考慮した回転角度の決定
-  // 傾いたデバイスの場合、より複雑な判定が必要
+  // ノッチの位置に基づいて、画像を回転させる角度を計算
+  // ノッチがある位置を「上」とみなすために、画像を回転させる
 
   if (minDist === distFromTop) {
-    // ノッチが上部に最も近い
-
-    // 上部でも左右どちらかに偏っている場合の補正
-    const xOffset = Math.abs(relX);
-    const yOffset = Math.abs(distFromTop);
-
-    if (xOffset > canvasWidth * 0.3) {
-      // 大きく横に傾いている場合
-      if (relX < 0) {
-        // 左上にノッチがある（左に傾いたスマホ）
-        return -45; // 左斜め上
-      } else {
-        // 右上にノッチがある（右に傾いたスマホ）
-        return 45; // 右斜め上
-      }
-    }
-    return 0; // 正常な向き（上向き）
+    // ノッチが上部に最も近い → 画像は回転不要
+    return 0;
 
   } else if (minDist === distFromBottom) {
-    // ノッチが下部に最も近い（上下反転）
+    // ノッチが下部に最も近い → 180度回転して上に持ってくる
     return 180;
 
   } else if (minDist === distFromLeft) {
-    // ノッチが左側に最も近い
-
-    // 左側でも上下どちらかに偏っている場合の補正
-    if (relY < -canvasHeight * 0.2) {
-      // 左上にノッチ（左斜め上向き）
-      return -45;
-    } else if (relY > canvasHeight * 0.2) {
-      // 左下にノッチ（左斜め下向き）
-      return -135;
-    }
-    return -90; // 左に90度回転
+    // ノッチが左側に最も近い → 90度右回転して上に持ってくる
+    return 90;
 
   } else if (minDist === distFromRight) {
-    // ノッチが右側に最も近い
-
-    // 右側でも上下どちらかに偏っている場合の補正
-    if (relY < -canvasHeight * 0.2) {
-      // 右上にノッチ（右斜め上向き）
-      return 45;
-    } else if (relY > canvasHeight * 0.2) {
-      // 右下にノッチ（右斜め下向き）
-      return 135;
-    }
-    return 90; // 右に90度回転
+    // ノッチが右側に最も近い → 90度左回転（-90度）して上に持ってくる
+    return -90;
   }
 
   // デフォルトは正常な向き
