@@ -5,6 +5,8 @@ import { containSize, coverSize, coverSizeWithBleed, getOptimalBleedPercent } fr
 import { DEVICE_COLOR_ORDER, getDeviceColor } from '../../../constants/deviceColors';
 import DebugButton from '../../../components/DebugButton';
 import { DebugPanel } from '../../../components/DebugPanel';
+import { EnhancedDebugPanel } from '../../../components/EnhancedDebugPanel';
+import { analyzeDeviceType, analyzeDeviceLayout } from '../../../utils/deviceTypeAnalyzer';
 import {
   detectWhiteMargins,
   analyzeDeviceOrientation,
@@ -164,6 +166,7 @@ export default function MultiDeviceMockup() {
   // 複数デバイス対応の状態管理
   const [deviceRegions, setDeviceRegions] = useState<DeviceRegionState[]>([]);
   const [activeDeviceIndex, setActiveDeviceIndex] = useState<DeviceIndex | null>(null);
+  const [selectedDeviceIndex, setSelectedDeviceIndex] = useState<DeviceIndex | null>(null); // クリックされたデバイスを追跡
   const [imageUrls, setImageUrls] = useState<(string | null)[]>([null, null, null]);
   const [imageKeys, setImageKeys] = useState<number[]>([0, 0, 0]);
 
@@ -486,7 +489,42 @@ export default function MultiDeviceMockup() {
     const existingDevice = findDeviceIndexByPosition(x, y);
     if (existingDevice !== null) {
       setActiveDeviceIndex(existingDevice);
+      setSelectedDeviceIndex(existingDevice);
       debugLogRef.current.push(`switched-to-device-${existingDevice}`);
+
+      // デバッグモード時は簡易分析データを生成
+      if (debugMode) {
+        const region = deviceRegions[existingDevice];
+        console.log(`🖱️ Device ${existingDevice + 1} clicked via overlay - showing info immediately`);
+
+        if (region?.rect) {
+          const aspectRatio = region.rect.wPct / region.rect.hPct;
+          const deviceType = aspectRatio > 1.3 ? 'laptop' :
+                           aspectRatio < 0.7 ? 'smartphone' : 'tablet';
+
+          const simpleAnalysis: DeviceOrientationAnalysis = {
+            deviceIndex: existingDevice,
+            deviceType: deviceType,
+            deviceRotation: 0,
+            majorAxisAngle: 0,
+            notchPosition: { x: 0, y: 0, angle: 0 },
+            recommendedImageRotation: 0,
+            analysisDetails: {
+              aspectRatio: aspectRatio,
+              isPortrait: aspectRatio < 1,
+              isLandscape: aspectRatio > 1,
+              isDiagonal: false
+            },
+            confidence: 0.5
+          };
+
+          setOrientationAnalyses(prev => {
+            const existing = prev.filter(a => a.deviceIndex !== existingDevice);
+            return [...existing, simpleAnalysis];
+          });
+        }
+      }
+
       return;
     }
 
@@ -655,9 +693,29 @@ export default function MultiDeviceMockup() {
       hPct: rh / h,
     };
 
+    // エリア選定時にデバイスタイプ分析を実行
+    const deviceAnalysis = analyzeDeviceType(newRect);
+
+    console.log(`\n🔍 Device ${deviceIndex + 1} エリア選定時の分析:`);
+    console.log(`デバイスタイプ: ${deviceAnalysis.deviceType}`);
+    console.log(`信頼度: ${(deviceAnalysis.confidence * 100).toFixed(0)}%`);
+    console.log(`判定理由: ${deviceAnalysis.reasoning.primary}`);
+
     setDeviceRegions(prev => prev.map((region, idx) =>
       idx === deviceIndex
-        ? { ...region, rect: newRect, corners, maskDataUrl: mUrl, hardMaskUrl: hUrl, darkOverlayUrl: darkUrl, isActive: true }
+        ? {
+            ...region,
+            rect: newRect,
+            corners,
+            maskDataUrl: mUrl,
+            hardMaskUrl: hUrl,
+            darkOverlayUrl: darkUrl,
+            isActive: true,
+            // デバイスタイプ情報を追加
+            deviceType: deviceAnalysis.deviceType,
+            deviceTypeConfidence: deviceAnalysis.confidence,
+            detectionReasoning: deviceAnalysis.reasoning.primary
+          }
         : region
     ));
     setActiveDeviceIndex(deviceIndex);
@@ -1511,15 +1569,125 @@ export default function MultiDeviceMockup() {
       {/* Multiple image uploaders */}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         {deviceRegions.map((region, idx) => (
-          <div key={idx} className="border rounded-lg p-3" style={{ borderColor: region.fillColor }}>
+          <div
+            key={idx}
+            className={`border rounded-lg p-3 cursor-pointer transition-all ${
+              selectedDeviceIndex === idx ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+            }`}
+            style={{ borderColor: region.fillColor }}
+            onClick={() => {
+              console.log(`🖱️ Device ${idx + 1} clicked - BEFORE state update`);
+              console.log(`  Current debugMode: ${debugMode}`);
+              console.log(`  Current selectedDeviceIndex: ${selectedDeviceIndex}`);
+              console.log(`  Current orientationAnalyses length: ${orientationAnalyses.length}`);
+              console.log(`  Current whiteMarginAnalyses length: ${whiteMarginAnalyses.length}`);
+
+              setSelectedDeviceIndex(idx as DeviceIndex);
+              setActiveDeviceIndex(idx as DeviceIndex);
+              console.log(`✅ Device ${idx + 1} selected - state updated`);
+
+              // デバッグモード時は詳細情報を表示
+              if (debugMode) {
+                console.log(`📊 Device ${idx + 1} detailed info:`, {
+                  rect: region.rect,
+                  fillColor: region.fillColor,
+                  isActive: region.isActive,
+                  hasImage: !!region.imageUrl,
+                  hardMaskUrl: !!region.hardMaskUrl,
+                  fullRegion: region
+                });
+
+                // 詳細なデバイス分析を実行
+                if (region.rect) {
+                  // デバイスタイプ分析器を使用して詳細な分析を実行
+                  const analysisResult = analyzeDeviceType(region.rect);
+
+                  console.log(`\n🔍 Device ${idx + 1} Detection Analysis:`);
+                  console.log(`════════════════════════════════════════════`);
+                  analysisResult.detectionSteps.forEach(step => {
+                    console.log(step);
+                  });
+                  console.log(`════════════════════════════════════════════`);
+                  console.log(`✅ Final Result: ${analysisResult.deviceType.toUpperCase()}`);
+                  console.log(`✅ Confidence: ${(analysisResult.confidence * 100).toFixed(0)}%`);
+                  console.log(`✅ Reasoning: ${analysisResult.reasoning.primary}\n`);
+
+                  // deviceRegionsにデバイスタイプ情報を更新
+                  setDeviceRegions(prev => prev.map((r, i) =>
+                    i === idx ? {
+                      ...r,
+                      deviceType: analysisResult.deviceType,
+                      deviceTypeConfidence: analysisResult.confidence,
+                      detectionReasoning: analysisResult.reasoning.primary
+                    } : r
+                  ));
+
+                  // 詳細分析データをorientationAnalysesに追加
+                  const detailedAnalysis: DeviceOrientationAnalysis = {
+                    deviceIndex: idx,
+                    deviceType: analysisResult.deviceType as 'laptop' | 'smartphone' | 'tablet',
+                    deviceRotation: 0,
+                    majorAxisAngle: 0,
+                    notchPosition: { x: 0, y: 0, angle: 0 },
+                    recommendedImageRotation: 0,
+                    analysisDetails: {
+                      aspectRatio: analysisResult.aspectRatio,
+                      isPortrait: analysisResult.orientation === 'portrait',
+                      isLandscape: analysisResult.orientation === 'landscape',
+                      isDiagonal: false,
+                      // 詳細な分析結果を追加
+                      deviceAnalysis: analysisResult
+                    },
+                    confidence: analysisResult.confidence
+                  };
+
+                  // 既存の分析があればそれを更新、なければ新規追加
+                  console.log(`🔬 Creating orientation analysis for device ${idx + 1}`);
+                  setOrientationAnalyses(prev => {
+                    const existing = prev.filter(a => a.deviceIndex !== idx);
+                    const newAnalyses = [...existing, detailedAnalysis];
+                    console.log(`  ➡️ Updated orientationAnalyses: ${newAnalyses.length} items`);
+                    return newAnalyses;
+                  });
+
+                  // 白い余白の簡易分析も追加
+                  console.log(`🔬 Creating margin analysis for device ${idx + 1}`);
+                  const marginAnalysis: WhiteMarginAnalysis = {
+                    deviceIndex: idx,
+                    hasWhiteMargin: false,
+                    marginLocations: { top: 0, bottom: 0, left: 0, right: 0 },
+                    whitePixelRatio: 0,
+                    totalEdgePixels: 0,
+                    detectedWhitePixels: 0,
+                    requiredBleedPercentage: 0,
+                    recommendations: ['画像をアップロードしてから詳細な分析が行われます']
+                  };
+
+                  setWhiteMarginAnalyses(prev => {
+                    const existing = prev.filter(a => a.deviceIndex !== idx);
+                    const newAnalyses = [...existing, marginAnalysis];
+                    console.log(`  ➡️ Updated whiteMarginAnalyses: ${newAnalyses.length} items`);
+                    return newAnalyses;
+                  });
+                } else {
+                  console.log(`⚠️ Device ${idx + 1} has no rect data - cannot create analysis`);
+                }
+              } else {
+                console.log(`📌 Device ${idx + 1} clicked - debugMode is OFF`);
+              }
+            }}
+          >
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium flex items-center gap-2">
+              <label className="text-sm font-medium flex items-center gap-2 pointer-events-none">
                 <span className="w-4 h-4 rounded-full" style={{ backgroundColor: region.fillColor }}></span>
                 デバイス {idx + 1}
               </label>
               {region.isActive && (
                 <button
-                  onClick={() => clearDevice(idx as DeviceIndex)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearDevice(idx as DeviceIndex);
+                  }}
                   className="text-xs px-2 py-1 border rounded hover:bg-gray-50"
                 >
                   クリア
@@ -1530,6 +1698,7 @@ export default function MultiDeviceMockup() {
               type="file"
               accept="image/*"
               onChange={(e) => onFileChange(e, idx as DeviceIndex)}
+              onClick={(e) => e.stopPropagation()}
               className="block text-sm"
             />
             {imageUrls[idx] && (
@@ -1769,6 +1938,21 @@ export default function MultiDeviceMockup() {
         whiteMarginAnalyses={whiteMarginAnalyses}
         orientationAnalyses={orientationAnalyses}
         isVisible={debugMode}
+        selectedDeviceIndex={selectedDeviceIndex}
+        deviceRegions={deviceRegions}
+      />
+
+      {/* 詳細デバッグパネル - 常に表示（debugModeで内容変化） */}
+      <EnhancedDebugPanel
+        isVisible={true}
+        debugMode={debugMode}
+        selectedDeviceIndex={selectedDeviceIndex}
+        deviceRegions={deviceRegions}
+        whiteMarginAnalyses={whiteMarginAnalyses}
+        orientationAnalyses={orientationAnalyses}
+        onDebugEvent={(event) => {
+          console.log(`[EnhancedDebug] ${event.type}:${event.action}`, event.details);
+        }}
       />
     </div>
   );

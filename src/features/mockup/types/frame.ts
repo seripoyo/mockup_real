@@ -37,6 +37,10 @@ export interface DeviceRegionState {
     width: number;
     height: number;
   };
+  // デバイスタイプ検出結果を追加
+  deviceType?: 'laptop' | 'smartphone' | 'tablet' | 'unknown';
+  deviceTypeConfidence?: number;
+  detectionReasoning?: string;
 }
 
 // Point型を追加

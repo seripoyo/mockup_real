@@ -1,0 +1,158 @@
+ Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(0)
+ Debug mode: false
+ ⚠️ No device regions found. Exiting.
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(0)
+ Debug mode: false
+ ⚠️ No device regions found. Exiting.
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(0)
+ Debug mode: false
+ ⚠️ No device regions found. Exiting.
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(3)
+ Debug mode: false
+ 🔧 Processing Device 0: Object
+ 📋 Device 0 Prerequisites Check: Object
+ ❌ Device 0: Missing prerequisites. Skipping.
+ 🔧 Processing Device 1: Object
+ 📋 Device 1 Prerequisites Check: Object
+ ❌ Device 1: Missing prerequisites. Skipping.
+ 🔧 Processing Device 2: Object
+ 📋 Device 2 Prerequisites Check: Object
+ ❌ Device 2: Missing prerequisites. Skipping.
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(3)
+ Debug mode: true
+ 🔧 Processing Device 0: Object
+ 📋 Device 0 Prerequisites Check: Object
+ ❌ Device 0: Missing prerequisites. Skipping.
+ 🔧 Processing Device 1: Object
+ 📋 Device 1 Prerequisites Check: Object
+ ❌ Device 1: Missing prerequisites. Skipping.
+ 🔧 Processing Device 2: Object
+ 📋 Device 2 Prerequisites Check: Object
+ ❌ Device 2: Missing prerequisites. Skipping.
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(3)
+ Debug mode: true
+ 🔧 Processing Device 0: Object
+ 📋 Device 0 Prerequisites Check: Object
+ ❌ Device 0: Missing prerequisites. Skipping.
+ 🔧 Processing Device 1: Object
+ 📋 Device 1 Prerequisites Check: Object
+ ❌ Device 1: Missing prerequisites. Skipping.
+ 🔧 Processing Device 2: Object
+ 📋 Device 2 Prerequisites Check: Object
+ ❌ Device 2: Missing prerequisites. Skipping.
+ 🔄 ==========  Composite useEffect triggered ==========
+ Device regions: Array(3)
+ Debug mode: true
+ 🔧 Processing Device 0: Object
+ 📋 Device 0 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 1: Object
+MultiDeviceMockup.tsx:809 📋 Device 1 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 2: Object
+MultiDeviceMockup.tsx:809 📋 Device 2 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:772 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:773 Device regions: Array(3)
+MultiDeviceMockup.tsx:774 Debug mode: true
+MultiDeviceMockup.tsx:797 🔧 Processing Device 0: Object
+MultiDeviceMockup.tsx:809 📋 Device 0 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 1: Object
+MultiDeviceMockup.tsx:809 📋 Device 1 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 2: Object
+MultiDeviceMockup.tsx:809 📋 Device 2 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:772 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:773 Device regions: Array(3)
+MultiDeviceMockup.tsx:774 Debug mode: true
+MultiDeviceMockup.tsx:797 🔧 Processing Device 0: Object
+MultiDeviceMockup.tsx:809 📋 Device 0 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 1: Object
+MultiDeviceMockup.tsx:809 📋 Device 1 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 2: Object
+MultiDeviceMockup.tsx:809 📋 Device 2 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:772 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:773 Device regions: Array(3)
+MultiDeviceMockup.tsx:774 Debug mode: true
+MultiDeviceMockup.tsx:797 🔧 Processing Device 0: Object
+MultiDeviceMockup.tsx:809 📋 Device 0 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 1: Object
+MultiDeviceMockup.tsx:809 📋 Device 1 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 2: Object
+MultiDeviceMockup.tsx:809 📋 Device 2 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:400 Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+（匿名） @ MultiDeviceMockup.tsx:400
+drawMaskIntoOverlay @ MultiDeviceMockup.tsx:395
+onOverlayClick @ MultiDeviceMockup.tsx:701
+callCallback2 @ chunk-HCIN4FJ4.js?v=48f22f73:3678
+invokeGuardedCallbackDev @ chunk-HCIN4FJ4.js?v=48f22f73:3703
+invokeGuardedCallback @ chunk-HCIN4FJ4.js?v=48f22f73:3737
+invokeGuardedCallbackAndCatchFirstError @ chunk-HCIN4FJ4.js?v=48f22f73:3740
+executeDispatch @ chunk-HCIN4FJ4.js?v=48f22f73:7044
+processDispatchQueueItemsInOrder @ chunk-HCIN4FJ4.js?v=48f22f73:7064
+processDispatchQueue @ chunk-HCIN4FJ4.js?v=48f22f73:7073
+dispatchEventsForPlugins @ chunk-HCIN4FJ4.js?v=48f22f73:7081
+（匿名） @ chunk-HCIN4FJ4.js?v=48f22f73:7204
+batchedUpdates$1 @ chunk-HCIN4FJ4.js?v=48f22f73:18964
+batchedUpdates @ chunk-HCIN4FJ4.js?v=48f22f73:3583
+dispatchEventForPluginEventSystem @ chunk-HCIN4FJ4.js?v=48f22f73:7203
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-HCIN4FJ4.js?v=48f22f73:5482
+dispatchEvent @ chunk-HCIN4FJ4.js?v=48f22f73:5476
+dispatchDiscreteEvent @ chunk-HCIN4FJ4.js?v=48f22f73:5453
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:772 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:773 Device regions: Array(3)
+MultiDeviceMockup.tsx:774 Debug mode: true
+MultiDeviceMockup.tsx:797 🔧 Processing Device 0: Object
+MultiDeviceMockup.tsx:809 📋 Device 0 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 1: Object
+MultiDeviceMockup.tsx:809 📋 Device 1 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 2: Object
+MultiDeviceMockup.tsx:809 📋 Device 2 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:772 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:773 Device regions: Array(3)
+MultiDeviceMockup.tsx:774 Debug mode: true
+MultiDeviceMockup.tsx:797 🔧 Processing Device 0: Object
+MultiDeviceMockup.tsx:809 📋 Device 0 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 1: Object
+MultiDeviceMockup.tsx:809 📋 Device 1 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:797 🔧 Processing Device 2: Object
+MultiDeviceMockup.tsx:809 📋 Device 2 Prerequisites Check: Object
+MultiDeviceMockup.tsx:820 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1759 🖼️ Rendering 0 device images

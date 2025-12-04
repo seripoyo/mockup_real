@@ -1,6 +1,16 @@
 /**
  * デバイス種類検出ユーティリティ
  * サンプル画像から学習した特徴を基に、より正確なデバイス判定を行う
+ *
+ * ⚠️ 重要: デバイス識別処理を修正する際は、必ず以下の仕様書を参照してください
+ * @see DEVICE_DETECTION_SPEC.md - デバイス識別の完全な仕様書
+ *
+ * 仕様書の主要ポイント:
+ * 1. 視覚的特徴を最優先: キーボード → ノッチ → アスペクト比の順
+ * 2. デバイス番号 ≠ デバイスタイプ: 面積順の番号と視覚特徴による判定は別
+ * 3. キーボード検出閾値: 40%以上（水平縞パターンも考慮）
+ * 4. ノッチ検出閾値: 3%以上
+ * 5. 信頼度ブースト: 視覚的特徴検出時は+30%
  */
 
 import { ScreenRectPct } from '../types/frame';
@@ -64,22 +74,26 @@ export function detectDeviceType(
     height
   });
 
-  // device.mdの判定フローに従った視覚的特徴による優先判定
-
-  // 1. キーボード/水平な板がある → ラップトップ（最優先）
+  // DEVICE_DETECTION_SPEC.mdの判定フローに従った視覚的特徴による優先判定
+  //
+  // ⚠️ 重要: この順序を変更しないでください
+  //
+  // 【第1優先】キーボード/水平な板がある → ラップトップ（確定）
+  // アスペクト比に関わらず、キーボードがあれば必ずラップトップ
   if (hasKeyboard) {
     console.log('✅ Laptop detected: keyboard/horizontal plate found');
     return 'laptop';
   }
 
-  // 2. 黒い切り抜き/楕円がある → スマートフォン
+  // 【第2優先】黒い切り抜き/楕円がある → スマートフォン（確定）
+  // アスペクト比に関わらず、ノッチがあれば必ずスマートフォン
   if (hasBlackCutout) {
     console.log('✅ Smartphone detected: black cutout/notch found');
     return 'smartphone';
   }
 
-  // 3. 視覚的特徴がない場合はアスペクト比による補助判定
-  // device.mdの表に基づく範囲判定
+  // 【第3優先】視覚的特徴がない場合はアスペクト比による補助判定
+  // DEVICE_DETECTION_SPEC.md セクション3の表に基づく範囲判定
 
   // ラップトップ: 1.3 - 2.0
   if (aspectRatio >= 1.3 && aspectRatio <= 2.0) {
