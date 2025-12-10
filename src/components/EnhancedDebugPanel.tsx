@@ -394,6 +394,38 @@ export const EnhancedDebugPanel: React.FC<EnhancedDebugPanelProps> = ({
                       </span>
                     </div>
                   )}
+                  {region.verticalDirection && (
+                    <div className="text-xs flex items-center gap-1">
+                      <span className="text-cyan-400">縦方向: </span>
+                      <span className="text-2xl font-bold text-yellow-400">
+                        {region.verticalDirection}
+                      </span>
+                      <span className="text-gray-400 text-xs ml-1">
+                        {region.verticalDirection === '↑' ? '(上向き)' :
+                         region.verticalDirection === '→' ? '(横向き)' :
+                         region.verticalDirection === '↗' ? '(斜め上)' :
+                         region.verticalDirection === '↘' ? '(斜め横)' :
+                         ''}
+                      </span>
+                    </div>
+                  )}
+                  {region.shapePattern && (
+                    <div className="text-xs flex items-center gap-1">
+                      <span className="text-cyan-400">形状: </span>
+                      <span className="font-bold text-purple-400">
+                        {region.shapePattern === 'rectangle' ? '🔷 長方形' :
+                         region.shapePattern === 'parallelogram' ? '🔶 平行四辺形' :
+                         region.shapePattern === 'trapezoid' ? '🔶 台形' :
+                         '❓ 不規則'}
+                      </span>
+                      <span className="text-gray-400 text-xs ml-1">
+                        {region.shapePattern === 'rectangle' ? '(正面ビュー)' :
+                         region.shapePattern === 'parallelogram' ? '(斜め3D)' :
+                         region.shapePattern === 'trapezoid' ? '(遠近法)' :
+                         ''}
+                      </span>
+                    </div>
+                  )}
                   {region.deviceTypeConfidence !== undefined && (
                     <div className="flex items-center gap-2">
                       <span className="text-cyan-400">信頼度:</span>

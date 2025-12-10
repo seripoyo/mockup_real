@@ -41,6 +41,8 @@ export interface DeviceRegionState {
   deviceType?: 'laptop' | 'smartphone' | 'tablet' | 'unknown';
   deviceTypeConfidence?: number;
   detectionReasoning?: string;
+  verticalDirection?: '↑' | '→' | '↗' | '↘' | '?';  // 縦方向の矢印（斜め対応）
+  shapePattern?: 'rectangle' | 'parallelogram' | 'trapezoid' | 'irregular';  // 形状パターン
 }
 
 // Point型を追加

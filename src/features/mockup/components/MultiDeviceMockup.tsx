@@ -693,13 +693,15 @@ export default function MultiDeviceMockup() {
       hPct: rh / h,
     };
 
-    // エリア選定時にデバイスタイプ分析を実行
-    const deviceAnalysis = analyzeDeviceType(newRect);
+    // エリア選定時にデバイスタイプ分析を実行（corners情報も渡す）
+    const deviceAnalysis = analyzeDeviceType(newRect, undefined, undefined, { corners });
 
     console.log(`\n🔍 Device ${deviceIndex + 1} エリア選定時の分析:`);
     console.log(`デバイスタイプ: ${deviceAnalysis.deviceType}`);
     console.log(`信頼度: ${(deviceAnalysis.confidence * 100).toFixed(0)}%`);
     console.log(`判定理由: ${deviceAnalysis.reasoning.primary}`);
+    console.log(`縦方向: ${deviceAnalysis.verticalDirection}`);
+    console.log(`形状パターン: ${deviceAnalysis.shapePattern || '検出なし'}`);
 
     setDeviceRegions(prev => prev.map((region, idx) =>
       idx === deviceIndex
@@ -714,7 +716,9 @@ export default function MultiDeviceMockup() {
             // デバイスタイプ情報を追加
             deviceType: deviceAnalysis.deviceType,
             deviceTypeConfidence: deviceAnalysis.confidence,
-            detectionReasoning: deviceAnalysis.reasoning.primary
+            detectionReasoning: deviceAnalysis.reasoning.primary,
+            verticalDirection: deviceAnalysis.verticalDirection,
+            shapePattern: deviceAnalysis.shapePattern
           }
         : region
     ));
@@ -1599,8 +1603,13 @@ export default function MultiDeviceMockup() {
 
                 // 詳細なデバイス分析を実行
                 if (region.rect) {
-                  // デバイスタイプ分析器を使用して詳細な分析を実行
-                  const analysisResult = analyzeDeviceType(region.rect);
+                  // デバイスタイプ分析器を使用して詳細な分析を実行（corners情報も渡す）
+                  const analysisResult = analyzeDeviceType(
+                    region.rect,
+                    undefined,
+                    undefined,
+                    { corners: region.corners }
+                  );
 
                   console.log(`\n🔍 Device ${idx + 1} Detection Analysis:`);
                   console.log(`════════════════════════════════════════════`);
@@ -1610,7 +1619,8 @@ export default function MultiDeviceMockup() {
                   console.log(`════════════════════════════════════════════`);
                   console.log(`✅ Final Result: ${analysisResult.deviceType.toUpperCase()}`);
                   console.log(`✅ Confidence: ${(analysisResult.confidence * 100).toFixed(0)}%`);
-                  console.log(`✅ Reasoning: ${analysisResult.reasoning.primary}\n`);
+                  console.log(`✅ Reasoning: ${analysisResult.reasoning.primary}`);
+                  console.log(`✅ Shape Pattern: ${analysisResult.shapePattern || 'N/A'}\n`);
 
                   // deviceRegionsにデバイスタイプ情報を更新
                   setDeviceRegions(prev => prev.map((r, i) =>
@@ -1618,7 +1628,8 @@ export default function MultiDeviceMockup() {
                       ...r,
                       deviceType: analysisResult.deviceType,
                       deviceTypeConfidence: analysisResult.confidence,
-                      detectionReasoning: analysisResult.reasoning.primary
+                      detectionReasoning: analysisResult.reasoning.primary,
+                      shapePattern: analysisResult.shapePattern
                     } : r
                   ));
 

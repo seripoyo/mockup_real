@@ -3,11 +3,15 @@
  * デバイス判定の理由を含む詳細な分析結果を提供
  */
 
+import { detectShapePattern, analyzeShape, getShapeScoreModifiers, type ShapePattern } from './shapeDetector';
+
 export interface DeviceAnalysisResult {
   deviceType: 'laptop' | 'smartphone' | 'tablet' | 'unknown';
   confidence: number;
   aspectRatio: number;
-  orientation: 'portrait' | 'landscape' | 'square';
+  orientation: 'portrait' | 'landscape' | 'square' | 'diagonal';
+  verticalDirection: '↑' | '→' | '↗' | '↘' | '?';  // 縦方向の矢印（斜め対応）
+  shapePattern?: ShapePattern;  // 形状パターン（長方形/平行四辺形/台形）
   dimensions: {
     widthPercent: number;
     heightPercent: number;
@@ -34,7 +38,16 @@ export function analyzeDeviceType(
   rect: { xPct: number; yPct: number; wPct: number; hPct: number } | null,
   frameWidth?: number,
   frameHeight?: number,
-  visualFeatures?: { hasKeyboard?: boolean; hasNotch?: boolean }
+  visualFeatures?: {
+    hasKeyboard?: boolean;
+    hasNotch?: boolean;
+    corners?: [
+      { x: number; y: number },
+      { x: number; y: number },
+      { x: number; y: number },
+      { x: number; y: number }
+    ];
+  }
 ): DeviceAnalysisResult {
   const steps: string[] = [];
   const factors: string[] = [];
@@ -47,6 +60,7 @@ export function analyzeDeviceType(
       confidence: 0,
       aspectRatio: 0,
       orientation: 'portrait',
+      verticalDirection: '?',
       dimensions: { widthPercent: 0, heightPercent: 0, pixelArea: 0 },
       reasoning: {
         primary: 'No device region data available',
@@ -73,9 +87,38 @@ export function analyzeDeviceType(
   steps.push(`📐 Dimensions: ${widthPercent.toFixed(1)}% × ${heightPercent.toFixed(1)}% = ${pixelArea.toFixed(1)}% area`);
   steps.push(`📊 Aspect ratio: ${aspectRatio.toFixed(3)} (width/height)`);
 
-  // Step 2: 向きの判定
-  let orientation: 'portrait' | 'landscape' | 'square';
-  if (aspectRatio < 0.95) {
+  // Step 1.5: 形状パターン検出（corners情報がある場合）
+  let shapePattern: ShapePattern | undefined;
+  let shapeModifiers = { laptopModifier: 1.0, smartphoneModifier: 1.0, tabletModifier: 1.0 };
+
+  if (visualFeatures?.corners) {
+    const shapeAnalysis = analyzeShape(visualFeatures.corners);
+    shapePattern = shapeAnalysis.pattern;
+    shapeModifiers = getShapeScoreModifiers(shapePattern);
+
+    steps.push(`\n🔷 Shape Pattern Analysis:`);
+    steps.push(`  形状: ${shapeAnalysis.description}`);
+    steps.push(`  角度: [${shapeAnalysis.angles.map(a => a.toFixed(1) + '°').join(', ')}]`);
+    steps.push(`  対辺差分: 上下=${(shapeAnalysis.oppositeSideDiffs[0] * 100).toFixed(1)}%, 左右=${(shapeAnalysis.oppositeSideDiffs[1] * 100).toFixed(1)}%`);
+
+    if (shapePattern === 'parallelogram' || shapePattern === 'trapezoid') {
+      steps.push(`  ⚠️ 3D形状検出: スマホスコアを減少、ラップトップ/タブレットスコアを増加`);
+      factors.push(`3D形状（${shapePattern}）により立体的なデバイスと推定`);
+    }
+  }
+
+  // Step 2: 向きの判定（斜め対応）
+  let orientation: 'portrait' | 'landscape' | 'square' | 'diagonal';
+
+  // 斜め向きの判定（rect.xPct, rect.yPctから簡易的に判定）
+  // 通常の矩形と比較して、位置のずれが大きい場合は斜めと判定
+  const isDiagonal = false; // TODO: 実際の斜め検出ロジックを実装
+
+  if (isDiagonal) {
+    orientation = 'diagonal';
+    steps.push(`↗ Orientation: DIAGONAL (tilted device detected)`);
+    factors.push('Diagonal orientation detected');
+  } else if (aspectRatio < 0.95) {
     orientation = 'portrait';
     steps.push(`📱 Orientation: PORTRAIT (aspect ratio < 0.95)`);
     factors.push('Portrait orientation detected');
@@ -196,7 +239,31 @@ export function analyzeDeviceType(
     }
   }
 
-  // Step 4: 最終スコアと判定
+  // Step 4.5: 形状パターンによるスコア調整
+  if (shapePattern && (shapePattern === 'parallelogram' || shapePattern === 'trapezoid')) {
+    steps.push(`\n🔷 Shape-based Score Adjustment (${shapePattern}):`);
+
+    const originalScores = {
+      laptop: laptopScore,
+      smartphone: smartphoneScore,
+      tablet: tabletScore
+    };
+
+    // スコア調整を適用（ただし、ノッチやキーボード検出がある場合は確定スコアなので調整しない）
+    if (!hasKeyboard && !hasNotch) {
+      laptopScore *= shapeModifiers.laptopModifier;
+      smartphoneScore *= shapeModifiers.smartphoneModifier;
+      tabletScore *= shapeModifiers.tabletModifier;
+
+      steps.push(`  💻 Laptop: ${originalScores.laptop}pts → ${laptopScore.toFixed(0)}pts (×${shapeModifiers.laptopModifier})`);
+      steps.push(`  📱 Smartphone: ${originalScores.smartphone}pts → ${smartphoneScore.toFixed(0)}pts (×${shapeModifiers.smartphoneModifier})`);
+      steps.push(`  📱 Tablet: ${originalScores.tablet}pts → ${tabletScore.toFixed(0)}pts (×${shapeModifiers.tabletModifier})`);
+    } else {
+      steps.push(`  ⚠️ キーボード/ノッチ検出済みのため、形状によるスコア調整はスキップ`);
+    }
+  }
+
+  // Step 5: 最終スコアと判定
   const totalScores = {
     laptop: laptopScore,
     smartphone: smartphoneScore,
@@ -204,9 +271,9 @@ export function analyzeDeviceType(
   };
 
   steps.push(`\n🏆 Final Scores:`);
-  steps.push(`  💻 Laptop: ${laptopScore}pts`);
-  steps.push(`  📱 Smartphone: ${smartphoneScore}pts`);
-  steps.push(`  📱 Tablet: ${tabletScore}pts`);
+  steps.push(`  💻 Laptop: ${laptopScore.toFixed(0)}pts`);
+  steps.push(`  📱 Smartphone: ${smartphoneScore.toFixed(0)}pts`);
+  steps.push(`  📱 Tablet: ${tabletScore.toFixed(0)}pts`);
 
   // 最高スコアのデバイスタイプを決定
   let deviceType: 'laptop' | 'smartphone' | 'tablet' | 'unknown';
@@ -229,6 +296,39 @@ export function analyzeDeviceType(
     deviceType = 'tablet';
     confidence = tabletScore / 100;
     steps.push(`\n📱 Result: TABLET (confidence: ${(confidence * 100).toFixed(0)}%)`);
+  }
+
+  // 縦方向の矢印を決定（斜め対応）
+  let verticalDirection: '↑' | '→' | '↗' | '↘' | '?' = '?';
+  if (deviceType === 'laptop') {
+    // ノートPCは常に上向き（キーボードが下にあるため）
+    verticalDirection = '↑';
+    steps.push(`\n📐 縦方向: ${verticalDirection} (ノートPCは常に上向き - キーボードが下)`);
+  } else if (deviceType === 'smartphone') {
+    // スマートフォンは向きによって変わる（ノッチ位置で判定）
+    if (orientation === 'diagonal') {
+      // 斜め向きの場合
+      // アスペクト比で斜めの方向を判定
+      if (aspectRatio < 1.0) {
+        verticalDirection = '↗';
+        steps.push(`\n📐 縦方向: ${verticalDirection} (スマホ斜め向き - 縦寄り)`);
+      } else {
+        verticalDirection = '↘';
+        steps.push(`\n📐 縦方向: ${verticalDirection} (スマホ斜め向き - 横寄り)`);
+      }
+    } else if (orientation === 'portrait') {
+      verticalDirection = '↑';
+      steps.push(`\n📐 縦方向: ${verticalDirection} (スマホ縦向き - ノッチが上)`);
+    } else {
+      verticalDirection = '→';
+      steps.push(`\n📐 縦方向: ${verticalDirection} (スマホ横向き - ノッチが横)`);
+    }
+  } else if (deviceType === 'tablet') {
+    // タブレットは常に上向き（明確な上下の区別がないため）
+    // 参考: Tablet_Example_and_vertical_direction.webp の仕様に基づく
+    verticalDirection = '↑';
+    steps.push(`\n📐 縦方向: ${verticalDirection} (タブレットは常に上向き - ノッチやキーボードなし)`);
+    factors.push('タブレットには明確な上下の区別がないため、すべて上向きと定義');
   }
 
   // 判定理由のサマリー（ビジュアル特徴を優先）
@@ -256,6 +356,8 @@ export function analyzeDeviceType(
     confidence: Math.min(confidence, 1),
     aspectRatio,
     orientation,
+    verticalDirection,
+    shapePattern,
     dimensions: {
       widthPercent,
       heightPercent,

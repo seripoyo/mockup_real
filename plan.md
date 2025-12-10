@@ -262,3 +262,5 @@ cleanupCanvas(tempCanvas);
 - **Phase 1** (即座): 白い余白除去、画質設定
 - **Phase 2** (30分): 向き検出と回転
 - **Phase 3** (1時間): 全体最適化とテスト
+
+- 
