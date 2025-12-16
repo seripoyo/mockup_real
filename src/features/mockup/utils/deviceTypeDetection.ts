@@ -51,18 +51,20 @@ export const DeviceCharacteristics = {
 };
 
 /**
- * アスペクト比と視覚的特徴からデバイス種類を判定（改良版）
- * device.mdの仕様に基づく視覚的特徴優先の判定
+ * 視覚的特徴からデバイス種類を判定
+ * アスペクト比は使用せず、キーボード・ノッチの有無のみで判定
  * @param width 幅
  * @param height 高さ
  * @param hasBlackCutout ノッチ/ダイナミックアイランドの有無
  * @param hasKeyboard キーボードの有無
+ * @param hasMetalSide 金属側面の有無（タブレット判定用）
  */
 export function detectDeviceType(
   width: number,
   height: number,
   hasBlackCutout: boolean = false,
-  hasKeyboard: boolean = false
+  hasKeyboard: boolean = false,
+  hasMetalSide: boolean = false
 ): DeviceType {
   const aspectRatio = width / height;
 
@@ -70,63 +72,39 @@ export function detectDeviceType(
     aspectRatio: aspectRatio.toFixed(2),
     hasBlackCutout,
     hasKeyboard,
+    hasMetalSide,
     width,
     height
   });
 
-  // DEVICE_DETECTION_SPEC.mdの判定フローに従った視覚的特徴による優先判定
-  //
-  // ⚠️ 重要: この順序を変更しないでください
-  //
-  // 【第1優先】キーボード/水平な板がある → ラップトップ（確定）
-  // アスペクト比に関わらず、キーボードがあれば必ずラップトップ
+  // 視覚的特徴による判定のみを使用
+  // アスペクト比は一切使用しない
+
+  // 【第1優先】キーボードがある → ラップトップ（確定）
   if (hasKeyboard) {
     console.log('✅ Laptop detected: keyboard/horizontal plate found');
     return 'laptop';
   }
 
-  // 【第2優先】黒い切り抜き/楕円がある → スマートフォン（確定）
-  // アスペクト比に関わらず、ノッチがあれば必ずスマートフォン
+  // 【第2優先】ノッチがある＆極端に細長い → スマートフォン（確定）
+  // スマートフォンは必ず極端に細長い（アスペクト比 < 0.56 または > 1.78）
   if (hasBlackCutout) {
-    console.log('✅ Smartphone detected: black cutout/notch found');
-    return 'smartphone';
-  }
-
-  // 【第3優先】視覚的特徴がない場合はアスペクト比による補助判定
-  // DEVICE_DETECTION_SPEC.md セクション3の表に基づく範囲判定
-
-  // ラップトップ: 1.3 - 2.0
-  if (aspectRatio >= 1.3 && aspectRatio <= 2.0) {
-    console.log('✅ Laptop detected by aspect ratio:', aspectRatio.toFixed(2));
+    // iPhone/Androidのような極端な細長さ（9:16 = 0.56, 16:9 = 1.78）
+    const isExtremelyElongated = aspectRatio < 0.56 || aspectRatio > 1.78;
+    if (isExtremelyElongated) {
+      console.log('✅ Smartphone detected: notch found in extremely elongated device');
+      return 'smartphone';
+    }
+    // ノッチがあるが極端に細長くない → ラップトップ（MacBookなど）
+    console.log('✅ Laptop detected: notch found but not extremely elongated');
     return 'laptop';
   }
 
-  // スマートフォン: 0.4 - 0.7
-  if (aspectRatio >= 0.4 && aspectRatio <= 0.7) {
-    console.log('✅ Smartphone detected by aspect ratio:', aspectRatio.toFixed(2));
-    return 'smartphone';
-  }
+  // 【第3優先】キーボードもノッチもない
+  // この時点で確実にタブレット
+  // （アスペクト比に関わらず、視覚的特徴がなければタブレット）
 
-  // タブレット: 0.7 - 1.3
-  if (aspectRatio > 0.7 && aspectRatio < 1.3) {
-    console.log('✅ Tablet detected by aspect ratio:', aspectRatio.toFixed(2));
-    return 'tablet';
-  }
-
-  // エッジケースの処理
-  if (aspectRatio < 0.4) {
-    // 非常に縦長 → スマートフォンの可能性
-    console.log('✅ Smartphone detected (very tall):', aspectRatio.toFixed(2));
-    return 'smartphone';
-  }
-
-  if (aspectRatio > 2.0) {
-    // 非常に横長 → ラップトップの可能性
-    console.log('✅ Laptop detected (very wide):', aspectRatio.toFixed(2));
-    return 'laptop';
-  }
-
-  console.log('⚠️ Unknown device type, defaulting to tablet');
+  console.log('✅ Tablet detected: no keyboard, no notch - defaulting to tablet');
   return 'tablet';
 }
 
@@ -136,8 +114,9 @@ export function detectDeviceType(
 export function detectDeviceTypeFromRegion(
   rect: ScreenRectPct,
   containerSize: { w: number; h: number },
-  maskData?: ImageData
-): { type: DeviceType; confidence: number; hasNotch: boolean; hasKeyboard: boolean } {
+  maskData?: ImageData,
+  frameImageData?: ImageData
+): { type: DeviceType; confidence: number; hasNotch: boolean; hasKeyboard: boolean; hasMetalSide: boolean } {
   // 実際のピクセルサイズを計算
   const actualWidth = rect.wPct * containerSize.w;
   const actualHeight = rect.hPct * containerSize.h;
@@ -145,13 +124,22 @@ export function detectDeviceTypeFromRegion(
   // マスクデータから視覚的特徴を検出
   let hasNotch = false;
   let hasKeyboard = false;
+  let hasMetalSide = false;
 
   if (maskData) {
     hasNotch = detectBlackCutout(maskData);
+    hasMetalSide = detectMetalSide(maskData);
+  }
+
+  // キーボードはフレーム全体から検出（画面の外側にあるため）
+  if (frameImageData) {
+    hasKeyboard = detectKeyboardFromFrame(frameImageData, rect);
+  } else if (maskData) {
+    // フォールバック：拡張マスクデータから検出を試みる
     hasKeyboard = detectKeyboard(maskData);
   }
 
-  const type = detectDeviceType(actualWidth, actualHeight, hasNotch, hasKeyboard);
+  const type = detectDeviceType(actualWidth, actualHeight, hasNotch, hasKeyboard, hasMetalSide);
 
   // 信頼度を計算（0-100%）
   let confidence = 50; // 基本信頼度
@@ -173,6 +161,9 @@ export function detectDeviceTypeFromRegion(
     if (type === 'smartphone' && hasNotch) {
       confidence += 30; // スマホでノッチ検出 = 高信頼度
     }
+    if (type === 'tablet' && hasMetalSide && !hasKeyboard && !hasNotch) {
+      confidence += 25; // タブレットで金属側面検出 = 高信頼度
+    }
 
     confidence = Math.min(100, Math.max(0, confidence));
   }
@@ -182,74 +173,365 @@ export function detectDeviceTypeFromRegion(
     confidence: `${confidence.toFixed(1)}%`,
     hasNotch,
     hasKeyboard,
+    hasMetalSide,
     aspectRatio: aspectRatio.toFixed(2)
   });
 
-  return { type, confidence, hasNotch, hasKeyboard };
+  return { type, confidence, hasNotch, hasKeyboard, hasMetalSide };
 }
 
 /**
- * マスク画像からキーボードの存在を検出（ラップトップ判定用）
- * ラップトップの場合、画面の下部に黒い横長の領域（キーボード/水平な板）が存在する
- * device.mdの仕様: 「下部にキーボードまたは水平な板が必ず存在」
+ * フレーム全体の画像から画面領域外のキーボードを検出
+ * @param frameImageData フレーム全体のImageData
+ * @param screenRect 画面領域の矩形（0-1の相対座標）
  */
-export function detectKeyboard(maskData: ImageData): boolean {
-  const { data, width, height } = maskData;
+export function detectKeyboardFromFrame(
+  frameImageData: ImageData,
+  screenRect: ScreenRectPct
+): boolean {
+  const { data, width, height } = frameImageData;
 
-  // アスペクト比を確認（横長でない場合はキーボードなし）
-  const aspectRatio = width / height;
-  if (aspectRatio < 1.2) {
+  // 画面領域の実際の座標を計算
+  const screenX = Math.floor(screenRect.xPct * width);
+  const screenY = Math.floor(screenRect.yPct * height);
+  const screenW = Math.floor(screenRect.wPct * width);
+  const screenH = Math.floor(screenRect.hPct * height);
+  const screenBottomY = screenY + screenH;
+
+  // 画面の下部から画像の下端までをチェック（キーボードが存在する領域）
+  // 最小10ピクセル、最大で画面高さの40%まで
+  const keyboardAreaHeight = Math.min(
+    Math.max(10, height - screenBottomY),
+    Math.floor(screenH * 0.4)
+  );
+
+  if (keyboardAreaHeight < 10) {
+    console.log('⚠️ No space below screen for keyboard check', {
+      screenBottomY,
+      imageHeight: height,
+      remainingSpace: height - screenBottomY
+    });
     return false;
   }
 
-  // 下部25%の領域をチェック（キーボードは画面下にある）
-  const checkStartY = Math.floor(height * 0.75);
+  console.log('🔎 Checking for keyboard in frame area:', {
+    screenRect: { x: screenX, y: screenY, w: screenW, h: screenH },
+    screenBottomY,
+    keyboardAreaHeight,
+    checkRegion: `Y: ${checkStartY}-${checkEndY}`
+  });
+
+  // キーボード検出領域：画面の下部から
+  const checkStartY = screenBottomY;
+  const checkEndY = Math.min(screenBottomY + keyboardAreaHeight, height);
+
+  // 中央80%の幅をチェック（DEVICE_DETECTION_SPEC.mdに準拠）
+  const checkStartX = screenX + Math.floor(screenW * 0.10);
+  const checkEndX = screenX + Math.floor(screenW * 0.90);
+
   let blackPixelCount = 0;
+  let midTonePixelCount = 0;
+  let whitePixelCount = 0;
   let totalPixelCount = 0;
+  let hasHorizontalPattern = false;
 
-  // 中央70%の幅をチェック（キーボードは中央に配置）
-  const checkStartX = Math.floor(width * 0.15);
-  const checkEndX = Math.floor(width * 0.85);
-
-  // 横方向の黒いピクセルの連続性を確認
-  let hasHorizontalBlackStripe = false;
-
-  for (let y = checkStartY; y < height; y++) {
+  // ピクセル分析
+  for (let y = checkStartY; y < checkEndY; y++) {
     let rowBlackCount = 0;
+    let rowMidToneCount = 0;
+    let rowWhiteCount = 0;
+
     for (let x = checkStartX; x < checkEndX; x++) {
       const idx = (y * width + x) * 4;
       const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
 
       totalPixelCount++;
-      // 黒いピクセル（輝度80未満に緩和）
-      if (luminance < 80) {
+
+      if (luminance < 50) {
         blackPixelCount++;
         rowBlackCount++;
+      } else if (luminance >= 50 && luminance <= 200) {
+        midTonePixelCount++;
+        rowMidToneCount++;
+      } else {
+        whitePixelCount++;
+        rowWhiteCount++;
       }
     }
 
-    // この行の50%以上が黒い場合、横縞があると判定
     const rowWidth = checkEndX - checkStartX;
-    if (rowBlackCount > rowWidth * 0.5) {
-      hasHorizontalBlackStripe = true;
+    const blackDominant = rowBlackCount > rowWidth * 0.3;
+    const midToneDominant = rowMidToneCount > rowWidth * 0.3;
+    const whiteDominant = rowWhiteCount > rowWidth * 0.3;
+
+    if (blackDominant || midToneDominant || whiteDominant) {
+      hasHorizontalPattern = true;
     }
   }
 
-  // チェック領域の40%以上が黒い、または横縞がある場合、キーボードありと判定
+  // 判定基準
   const blackRatio = totalPixelCount > 0 ? blackPixelCount / totalPixelCount : 0;
-  const hasKeyboard = blackRatio > 0.4 || hasHorizontalBlackStripe;
+  const midToneRatio = totalPixelCount > 0 ? midTonePixelCount / totalPixelCount : 0;
+  const whiteRatio = totalPixelCount > 0 ? whitePixelCount / totalPixelCount : 0;
+
+  // しきい値を下げて検出しやすくする（画面外なので確実にキーボード領域）
+  // 何らかの色のパターンがあればキーボードと判定
+  const hasBlackKeyboard = blackRatio >= 0.20;  // より緩く
+  const hasLightKeyboard = midToneRatio >= 0.20 || whiteRatio >= 0.15;  // より緩く
+  const hasSomePattern = (blackRatio + midToneRatio + whiteRatio) >= 0.30;  // 何かしらの色が30%以上
+  const hasKeyboard = hasBlackKeyboard || hasLightKeyboard || hasHorizontalPattern || hasSomePattern;
 
   if (hasKeyboard) {
-    console.log('⌨️ Keyboard/horizontal plate detected (laptop feature):', {
+    const detectedColor =
+      hasBlackKeyboard ? '黒' :
+      hasLightKeyboard ? (midToneRatio > whiteRatio ? 'グレー' : '白/シルバー') :
+      'パターン検出';
+
+    console.log('⌨️ Keyboard detected from frame (below screen):', {
+      color: detectedColor,
       blackRatio: blackRatio.toFixed(3),
-      blackPixels: blackPixelCount,
-      totalPixels: totalPixelCount,
-      hasHorizontalStripe: hasHorizontalBlackStripe,
-      aspectRatio: aspectRatio.toFixed(2)
+      midToneRatio: midToneRatio.toFixed(3),
+      whiteRatio: whiteRatio.toFixed(3),
+      hasHorizontalPattern,
+      checkedArea: `Y: ${checkStartY}-${checkEndY}, X: ${checkStartX}-${checkEndX}`,
+      screenBottom: screenBottomY,
+      keyboardAreaHeight
+    });
+  } else {
+    console.log('❌ No keyboard detected in frame area:', {
+      blackRatio: blackRatio.toFixed(3),
+      midToneRatio: midToneRatio.toFixed(3),
+      whiteRatio: whiteRatio.toFixed(3),
+      totalRatio: (blackRatio + midToneRatio + whiteRatio).toFixed(3),
+      hasHorizontalPattern,
+      thresholds: {
+        blackNeeded: 0.20,
+        midToneNeeded: 0.20,
+        whiteNeeded: 0.15,
+        totalNeeded: 0.30
+      },
+      checkedArea: `Y: ${checkStartY}-${checkEndY}, X: ${checkStartX}-${checkEndX}`,
+      pixelsCounted: totalPixelCount
     });
   }
 
   return hasKeyboard;
+}
+
+/**
+ * マスク画像からキーボードの存在を検出（ラップトップ判定用）
+ * ラップトップの場合、画面の下部に帯状の領域（キーボード/水平な板）が存在する
+ * DEVICE_DETECTION_SPEC.md: キーボード側面は黒、白、シルバー、グレーなど多様
+ */
+export function detectKeyboard(maskData: ImageData): boolean {
+  const { data, width, height } = maskData;
+  const aspectRatio = width / height; // デバッグログ用
+
+  // キーボード検出領域を複数試行
+  // 1. 標準領域：下部20%（DEVICE_DETECTION_SPEC.mdに準拠）
+  // 2. 拡張領域：下部30%（斜めビュー対応）
+  // 3. 広域領域：下部40%（床置きビュー対応）
+
+  const regions = [
+    { name: '標準(下部20%)', startRatio: 0.80, endRatio: 1.00 },
+    { name: '拡張(下部30%)', startRatio: 0.70, endRatio: 1.00 },
+    { name: '広域(下部40%)', startRatio: 0.60, endRatio: 1.00 }
+  ];
+
+  // デバッグ情報を収集
+  const debugInfo: any = {
+    aspectRatio: aspectRatio.toFixed(2),
+    width,
+    height,
+    regions: []
+  };
+
+  for (const region of regions) {
+    const checkStartY = Math.floor(height * region.startRatio);
+    const checkEndY = Math.floor(height * region.endRatio);
+
+    let blackPixelCount = 0;
+    let midTonePixelCount = 0;
+    let whitePixelCount = 0;
+    let totalPixelCount = 0;
+
+    // 中央80%の幅をチェック（DEVICE_DETECTION_SPEC.mdに準拠）
+    const checkStartX = Math.floor(width * 0.10);
+    const checkEndX = Math.floor(width * 0.90);
+
+    // 水平エッジの検出（色によらないパターン検出）
+    let horizontalEdgeCount = 0;
+    let hasHorizontalPattern = false;
+
+    // 各行のピクセル分析
+    for (let y = checkStartY; y < checkEndY; y++) {
+      let rowBlackCount = 0;
+      let rowMidToneCount = 0;
+      let rowWhiteCount = 0;
+      let prevLuminance = -1;
+      let edgesInRow = 0;
+
+      for (let x = checkStartX; x < checkEndX; x++) {
+        const idx = (y * width + x) * 4;
+        const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+
+        totalPixelCount++;
+
+        // 色の分類（DEVICE_DETECTION_SPEC.mdの色バリエーション対応）
+        if (luminance < 50) {
+          // 黒（DEVICE_DETECTION_SPEC.md: 輝度 < 50）
+          blackPixelCount++;
+          rowBlackCount++;
+        } else if (luminance >= 50 && luminance <= 200) {
+          // 中間色（グレー、シルバー）
+          midTonePixelCount++;
+          rowMidToneCount++;
+        } else {
+          // 白、明るいシルバー
+          whitePixelCount++;
+          rowWhiteCount++;
+        }
+
+        // 水平エッジ検出（輝度の急激な変化）
+        if (prevLuminance >= 0) {
+          const luminanceChange = Math.abs(luminance - prevLuminance);
+          if (luminanceChange > 30) {
+            edgesInRow++;
+          }
+        }
+        prevLuminance = luminance;
+      }
+
+      // 水平縞パターンの検出（キーの境界線）
+      const rowWidth = checkEndX - checkStartX;
+      if (edgesInRow > rowWidth * 0.05) {
+        horizontalEdgeCount++;
+      }
+
+      // この行の40%以上が同一色系統の場合、帯状領域と判定
+      const blackDominant = rowBlackCount > rowWidth * 0.4;
+      const midToneDominant = rowMidToneCount > rowWidth * 0.4;
+      const whiteDominant = rowWhiteCount > rowWidth * 0.4;
+
+      if (blackDominant || midToneDominant || whiteDominant) {
+        hasHorizontalPattern = true;
+      }
+    }
+
+    // 判定基準（DEVICE_DETECTION_SPEC.mdの3つの検出方法）
+    const blackRatio = totalPixelCount > 0 ? blackPixelCount / totalPixelCount : 0;
+    const midToneRatio = totalPixelCount > 0 ? midTonePixelCount / totalPixelCount : 0;
+    const whiteRatio = totalPixelCount > 0 ? whitePixelCount / totalPixelCount : 0;
+
+    // 方法1: 黒いキーボードの検出（DEVICE_DETECTION_SPEC.md: 40%閾値）
+    const hasBlackKeyboard = blackRatio >= 0.40;
+
+    // 方法2: 白/シルバー/グレーキーボードの検出（DEVICE_DETECTION_SPEC.md: 40%閾値）
+    const hasLightKeyboard = midToneRatio >= 0.40;
+
+    // 方法3: 水平縞パターン検出（色によらない）
+    const hasEdgePattern = horizontalEdgeCount > 3;
+
+    // いずれかの方法で検出されればキーボードあり
+    const hasKeyboard = hasBlackKeyboard || hasLightKeyboard || hasHorizontalPattern || hasEdgePattern;
+
+    // デバッグ情報を記録
+    debugInfo.regions.push({
+      name: region.name,
+      blackRatio: blackRatio.toFixed(3),
+      midToneRatio: midToneRatio.toFixed(3),
+      whiteRatio: whiteRatio.toFixed(3),
+      hasBlackKeyboard,
+      hasLightKeyboard,
+      hasHorizontalPattern,
+      hasEdgePattern,
+      detected: hasKeyboard
+    });
+
+    if (hasKeyboard) {
+      const detectedColor =
+        hasBlackKeyboard ? '黒' :
+        hasLightKeyboard ? (midToneRatio > whiteRatio ? 'グレー' : '白/シルバー') :
+        hasEdgePattern ? 'パターン検出' : '不明';
+
+      console.log('⌨️ Keyboard/horizontal plate detected (laptop feature):', {
+        region: region.name,
+        color: detectedColor,
+        blackRatio: blackRatio.toFixed(3),
+        midToneRatio: midToneRatio.toFixed(3),
+        whiteRatio: whiteRatio.toFixed(3),
+        hasHorizontalPattern,
+        hasEdgePattern,
+        aspectRatio: aspectRatio.toFixed(2)
+      });
+
+      // キーボードが検出されたら早期リターン
+      return true;
+    }
+  }
+
+  // すべての領域でキーボードが検出されなかった場合のデバッグ出力
+  console.log('❌ No keyboard detected in any region:', debugInfo);
+
+  return false;
+}
+
+/**
+ * マスクデータから金属側面を検出（タブレット判定用）
+ * DEVICE_DETECTION_SPEC.md: タブレットの斜め/床置きビューで金属側面（2-5%厚）が見える
+ */
+export function detectMetalSide(maskData: ImageData): boolean {
+  const { data, width, height } = maskData;
+
+  // 周辺5%の領域をスキャン
+  const edgeThickness = Math.floor(Math.min(width, height) * 0.05);
+  let metalPixelCount = 0;
+  let totalPixelCount = 0;
+
+  // 上下左右の端をチェック
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      // 端の領域のみチェック
+      const isEdge =
+        x < edgeThickness || x >= width - edgeThickness ||
+        y < edgeThickness || y >= height - edgeThickness;
+
+      if (!isEdge) continue;
+
+      const idx = (y * width + x) * 4;
+      const r = data[idx];
+      const g = data[idx + 1];
+      const b = data[idx + 2];
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // 彩度を計算（グレースケール判定）
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      const saturation = max > 0 ? (max - min) / max : 0;
+
+      totalPixelCount++;
+
+      // 金属色の検出: 輝度0.4〜0.7（白より暗く、黒より明るい）
+      // かつ彩度が低い（グレースケール）
+      if (luminance >= 102 && luminance <= 178 && saturation < 0.2) {
+        metalPixelCount++;
+      }
+    }
+  }
+
+  // 端領域の10%以上が金属色の場合、金属側面ありと判定
+  const metalRatio = totalPixelCount > 0 ? metalPixelCount / totalPixelCount : 0;
+  const hasMetalSide = metalRatio > 0.1;
+
+  if (hasMetalSide) {
+    console.log('🔩 Metal side detected (tablet feature):', {
+      metalRatio: metalRatio.toFixed(3),
+      metalPixels: metalPixelCount,
+      totalPixels: totalPixelCount
+    });
+  }
+
+  return hasMetalSide;
 }
 
 /**
@@ -261,8 +543,12 @@ export function detectBlackCutout(maskData: ImageData): boolean {
   // アスペクト比を確認
   const aspectRatio = width / height;
 
-  // 横長の場合はノッチなしと判定（ラップトップの可能性）
-  if (aspectRatio > 1.2) {
+  // スマートフォン以外（アスペクト比が極端でない）はノッチなしと判定
+  // スマートフォンは必ず極端に細長い（0.56以下または1.78以上）
+  const isSmartphoneShape = aspectRatio < 0.56 || aspectRatio > 1.78;
+  if (!isSmartphoneShape) {
+    // スマートフォンの形状でなければノッチ検出をスキップ
+    console.log('⚠️ Not smartphone shape, skipping notch detection (aspect ratio:', aspectRatio.toFixed(2), ')');
     return false;
   }
 
@@ -271,33 +557,62 @@ export function detectBlackCutout(maskData: ImageData): boolean {
   let blackPixelCount = 0;
   let totalPixelCount = 0;
 
-  // 中央70%の幅のみをチェック（ノッチは通常中央にある）
-  const checkStartX = Math.floor(width * 0.15);
-  const checkEndX = Math.floor(width * 0.85);
+  // 中央30%の幅のみをチェック（DEVICE_DETECTION_SPEC.md: より狭い範囲）
+  // ノッチは画面幅の15〜30%程度なので、中央30%で十分
+  const checkStartX = Math.floor(width * 0.35);
+  const checkEndX = Math.floor(width * 0.65);
+
+  // ノッチの連続性をチェックするための変数
+  let consecutiveBlackRows = 0;
+  let maxConsecutiveBlack = 0;
 
   for (let y = 0; y < checkHeight; y++) {
+    let rowBlackCount = 0;
+    let rowTotalCount = 0;
+
     for (let x = checkStartX; x < checkEndX; x++) {
       const idx = (y * width + x) * 4;
       const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
 
       totalPixelCount++;
+      rowTotalCount++;
+
       // 黒いピクセル（輝度30未満）
       if (luminance < 30) {
         blackPixelCount++;
+        rowBlackCount++;
       }
+    }
+
+    // この行が黒い切り抜きの一部かチェック
+    const rowBlackRatio = rowTotalCount > 0 ? rowBlackCount / rowTotalCount : 0;
+    if (rowBlackRatio > 0.2) {
+      consecutiveBlackRows++;
+      maxConsecutiveBlack = Math.max(maxConsecutiveBlack, consecutiveBlackRows);
+    } else {
+      consecutiveBlackRows = 0;
     }
   }
 
-  // チェックした領域の3%以上が黒い場合、ノッチありと判定
+  // チェックした領域の3%以上が黒い場合、かつ連続した黒い行が存在する場合、ノッチありと判定
   const blackRatio = totalPixelCount > 0 ? blackPixelCount / totalPixelCount : 0;
-  const hasNotch = blackRatio > 0.03;
+  const hasNotch = blackRatio > 0.03 && maxConsecutiveBlack >= 3;
 
   if (hasNotch) {
     console.log('📱 Notch detected (smartphone feature):', {
       blackRatio: blackRatio.toFixed(3),
       aspectRatio: aspectRatio.toFixed(2),
       blackPixels: blackPixelCount,
-      totalPixels: totalPixelCount
+      totalPixels: totalPixelCount,
+      consecutiveRows: maxConsecutiveBlack,
+      scanArea: `中央${((checkEndX - checkStartX) / width * 100).toFixed(0)}%`
+    });
+  } else if (blackRatio > 0.01) {
+    console.log('⚠️ Black pixels found but not enough for notch:', {
+      blackRatio: blackRatio.toFixed(3),
+      aspectRatio: aspectRatio.toFixed(2),
+      consecutiveRows: maxConsecutiveBlack,
+      reason: maxConsecutiveBlack < 3 ? '連続性なし' : '黒ピクセル不足'
     });
   }
 
@@ -305,16 +620,58 @@ export function detectBlackCutout(maskData: ImageData): boolean {
 }
 
 /**
+ * ノッチの位置を検出（スマートフォンの向き判定用）
+ * @returns ノッチの相対位置（0-1の範囲）またはnull
+ */
+function detectNotchPosition(maskData: ImageData): { x: number; y: number } | null {
+  const { data, width, height } = maskData;
+
+  // 全画面の中心領域50%を放射状スキャン（DEVICE_DETECTION_SPEC.md）
+  const scanStartX = Math.floor(width * 0.25);
+  const scanEndX = Math.floor(width * 0.75);
+  const scanStartY = Math.floor(height * 0.25);
+  const scanEndY = Math.floor(height * 0.75);
+
+  let notchCenterX = 0;
+  let notchCenterY = 0;
+  let blackPixelCount = 0;
+
+  for (let y = scanStartY; y < scanEndY; y++) {
+    for (let x = scanStartX; x < scanEndX; x++) {
+      const idx = (y * width + x) * 4;
+      const luminance = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+
+      // 黒いピクセル（ノッチ）
+      if (luminance < 30) {
+        notchCenterX += x;
+        notchCenterY += y;
+        blackPixelCount++;
+      }
+    }
+  }
+
+  if (blackPixelCount === 0) return null;
+
+  // ノッチの重心を計算
+  return {
+    x: (notchCenterX / blackPixelCount) / width,
+    y: (notchCenterY / blackPixelCount) / height
+  };
+}
+
+/**
  * デバイスの縦方向（矢印方向）を検出
- * device.mdの仕様に基づく判定
+ * DEVICE_DETECTION_SPEC.mdの仕様に基づく判定
  * @param deviceType デバイス種類
  * @param deviceAspectRatio デバイス領域のアスペクト比
- * @returns 矢印の方向（'up', 'right', 'diagonal-up'）
+ * @param maskData マスクデータ（ノッチ位置検出用）
+ * @returns 矢印の方向（'up', 'right', 'diagonal-up', 'diagonal-right'）
  */
 export function detectDeviceVerticalDirection(
   deviceType: DeviceType,
-  deviceAspectRatio: number
-): 'up' | 'right' | 'diagonal-up' {
+  deviceAspectRatio: number,
+  maskData?: ImageData
+): 'up' | 'right' | 'diagonal-up' | 'diagonal-right' {
   console.log('🧭 Detecting device vertical direction:', {
     deviceType,
     deviceAspectRatio: deviceAspectRatio.toFixed(2)
@@ -322,10 +679,41 @@ export function detectDeviceVerticalDirection(
 
   switch (deviceType) {
     case 'laptop':
-      // ラップトップ：矢印は常に上向き（↑）
+      // DEVICE_DETECTION_SPEC.md: ラップトップは常に上向き（↑）
       return 'up';
 
     case 'smartphone':
+      // DEVICE_DETECTION_SPEC.md: ノッチ位置基準の判定
+      if (maskData) {
+        const notchPosition = detectNotchPosition(maskData);
+        if (notchPosition) {
+          // ノッチの位置で向きを判定
+          if (notchPosition.y < 0.2) {
+            // ノッチが上部 → 縦向き（↑）
+            return 'up';
+          } else if (notchPosition.x < 0.2) {
+            // ノッチが左端 → 横向き（→）
+            return 'right';
+          } else if (notchPosition.x > 0.8) {
+            // ノッチが右端 → 横向き（→）
+            return 'right';
+          } else {
+            // 斜め向き
+            const angle = Math.atan2(0.5 - notchPosition.y, notchPosition.x - 0.5) * 180 / Math.PI;
+            if (angle >= -22.5 && angle < 22.5) {
+              return 'up';
+            } else if (angle >= 22.5 && angle < 67.5) {
+              return 'diagonal-up';
+            } else if (angle >= 67.5 && angle < 112.5) {
+              return 'right';
+            } else {
+              return 'diagonal-right';
+            }
+          }
+        }
+      }
+
+      // ノッチが検出できない場合はアスペクト比で判定
       if (deviceAspectRatio < 1.0) {
         // 縦向きの場合：矢印は上向き（↑）
         return 'up';
@@ -335,16 +723,9 @@ export function detectDeviceVerticalDirection(
       }
 
     case 'tablet':
-      if (deviceAspectRatio < 0.9) {
-        // 縦向きの場合：矢印は上向き（↑）
-        return 'up';
-      } else if (deviceAspectRatio > 1.1) {
-        // 横向きの場合：矢印は斜め上向き（↗）
-        return 'diagonal-up';
-      } else {
-        // ほぼ正方形：デフォルトは上向き
-        return 'up';
-      }
+      // DEVICE_DETECTION_SPEC.md: タブレットは常に上向き（↑）
+      // 明確な上下の区別がないため、すべて上向きと定義
+      return 'up';
 
     default:
       return 'up';
@@ -362,7 +743,7 @@ export function detectDeviceVerticalDirection(
  */
 export function determineDeviceOrientation(
   deviceType: DeviceType,
-  _maskData?: ImageData,
+  maskData?: ImageData,
   rect?: ScreenRectPct,
   imageNatural?: { w: number; h: number }
 ): number {
@@ -378,8 +759,8 @@ export function determineDeviceOrientation(
     imageAspectRatio = imageNatural.w / imageNatural.h;
   }
 
-  // デバイスの縦方向を検出
-  const verticalDirection = detectDeviceVerticalDirection(deviceType, deviceAspectRatio);
+  // デバイスの縦方向を検出（マスクデータを渡す）
+  const verticalDirection = detectDeviceVerticalDirection(deviceType, deviceAspectRatio, maskData);
 
   console.log('🔄 Orientation detection:', {
     deviceType,
@@ -419,11 +800,12 @@ export function determineDeviceOrientation(
       return 0;
 
     case 'diagonal-up':
-      // 矢印が斜め上：デバイスは横向き（横向きタブレット）
+    case 'diagonal-right':
+      // 矢印が斜め：デバイスは斜め向き
       if (imageNatural && imageAspectRatio < 0.9) {
-        // 画像が縦長 → 90度回転して横にする
-        console.log('🔄 Rotating portrait image 90° to match horizontal tablet');
-        return 90;
+        // 画像が縦長 → 45度回転
+        console.log('🔄 Rotating portrait image for diagonal device');
+        return 45;
       }
       return 0;
 

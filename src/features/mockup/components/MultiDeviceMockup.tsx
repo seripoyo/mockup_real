@@ -927,23 +927,85 @@ export default function MultiDeviceMockup() {
         };
 
         // 改良版デバイスタイプ判定
-        // マスクデータからノッチ/ダイナミックアイランドを検出
-        const tempMaskCanvas = document.createElement('canvas');
-        tempMaskCanvas.width = canvasWidth;
-        tempMaskCanvas.height = canvasHeight;
-        const tempMaskCtx = tempMaskCanvas.getContext('2d', { willReadFrequently: true });
-        let maskDataForAnalysis: ImageData | undefined;
+        // フレーム画像全体からデバイス領域を切り出してキーボードを検出
+        const tempAnalysisCanvas = document.createElement('canvas');
 
-        if (tempMaskCtx && mk) {
-          tempMaskCtx.drawImage(mk, 0, 0, mk.width, mk.height, 0, 0, canvasWidth, canvasHeight);
-          maskDataForAnalysis = tempMaskCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+        // デバイス領域を拡張してキーボード部分も含める
+        // 画面領域の下に20%の余白を追加（キーボード検出用）
+        const expandedHeight = canvasHeight * 1.3; // 高さを30%拡張
+        tempAnalysisCanvas.width = canvasWidth;
+        tempAnalysisCanvas.height = expandedHeight;
+        const tempAnalysisCtx = tempAnalysisCanvas.getContext('2d', { willReadFrequently: true });
+
+        let deviceAreaData: ImageData | undefined;
+
+        if (tempAnalysisCtx && frameUrl) {
+          // フレーム画像から対応する領域を切り出し
+          const frameImg = new Image();
+          frameImg.src = frameUrl;
+          await new Promise((resolve) => {
+            frameImg.onload = resolve;
+          });
+
+          // デバイス領域の座標を計算（フレーム画像内での位置）
+          const frameW = frameImg.width;
+          const frameH = frameImg.height;
+          const deviceX = region.rect.xPct * frameW;
+          const deviceY = region.rect.yPct * frameH;
+          const deviceW = region.rect.wPct * frameW;
+          const deviceH = region.rect.hPct * frameH;
+
+          // 拡張高さの計算（画像の境界を超えないように）
+          const expandedDeviceH = Math.min(deviceH * 1.3, frameH - deviceY);
+
+          // フレーム画像から拡張されたデバイス領域を描画
+          tempAnalysisCtx.drawImage(
+            frameImg,
+            deviceX, deviceY, deviceW, expandedDeviceH,
+            0, 0, canvasWidth, expandedHeight
+          );
+
+          deviceAreaData = tempAnalysisCtx.getImageData(0, 0, canvasWidth, expandedHeight);
+
+          console.log(`🔍 Device ${region.deviceIndex}: Extended area analysis`, {
+            originalHeight: canvasHeight,
+            expandedHeight: expandedHeight,
+            expandedDeviceH: expandedDeviceH,
+            deviceAreaDataSize: deviceAreaData ? `${deviceAreaData.width}x${deviceAreaData.height}` : 'none'
+          });
         }
 
-        // 新しいデバイス判定ロジックを使用
+        // フレーム全体のImageDataを取得（キーボード検出用）
+        let frameFullImageData: ImageData | undefined;
+        if (tempAnalysisCtx && frameUrl) {
+          const frameFullCanvas = document.createElement('canvas');
+          const frameFullCtx = frameFullCanvas.getContext('2d');
+          if (frameFullCtx) {
+            const frameImg = new Image();
+            frameImg.src = frameUrl;
+            await new Promise((resolve) => {
+              frameImg.onload = resolve;
+            });
+
+            frameFullCanvas.width = frameImg.width;
+            frameFullCanvas.height = frameImg.height;
+            frameFullCtx.drawImage(frameImg, 0, 0);
+            frameFullImageData = frameFullCtx.getImageData(0, 0, frameImg.width, frameImg.height);
+
+            console.log('📷 Frame full image loaded for keyboard detection:', {
+              deviceIndex: region.deviceIndex,
+              frameSize: `${frameImg.width}x${frameImg.height}`,
+              dataSize: frameFullImageData ? `${frameFullImageData.width}x${frameFullImageData.height}` : 'none'
+            });
+          }
+        }
+
+        // 新しいデバイス判定ロジックを使用（フレーム全体のデータも渡す）
         const deviceDetectionResult = detectDeviceTypeFromRegion(
           region.rect,
           { w: containerSize.w, h: containerSize.h },
-          maskDataForAnalysis
+          deviceAreaData || undefined,
+          frameFullImageData || undefined
         );
 
         const deviceType: string = deviceDetectionResult.type;

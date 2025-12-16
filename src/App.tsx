@@ -1,5 +1,6 @@
 import MultiDeviceMockup from "./features/mockup/components/MultiDeviceMockup";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { DeviceDebugger } from "./components/DeviceDebugger";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <MultiDeviceMockup />
         </ErrorBoundary>
       </div>
+      <DeviceDebugger />
     </main>
   );
 }
