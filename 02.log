@@ -1,0 +1,183 @@
+chunk-SVG7M4VJ.js?v=a13359cd:21607 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] render:mount {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 0, hasAnalyses: {…}}
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 0, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: []
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:804 ⚠️ No device regions found. Exiting.
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] render:mount {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 0, hasAnalyses: {…}}
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 0, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: []
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:804 ⚠️ No device regions found. Exiting.
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: []
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:804 ⚠️ No device regions found. Exiting.
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:699 
+🔍 Device 1 エリア選定時の分析:
+MultiDeviceMockup.tsx:700 デバイスタイプ: smartphone
+MultiDeviceMockup.tsx:701 信頼度: 80%
+MultiDeviceMockup.tsx:702 判定理由: 縦長画面 (アスペクト比: 0.65) と狭い画面幅
+MultiDeviceMockup.tsx:703 縦方向: ↑
+MultiDeviceMockup.tsx:704 形状パターン: rectangle
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: false, hasHardMaskUrl: true, hasImageNatural: false, hasRect: true, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: true, hardMaskUrl: true, imageUrl: false, imageNatural: false, rect: true, …}
+MultiDeviceMockup.tsx:846 ❌ Device 0: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:292 🎨 Device 0 - Image loaded: {width: 4032, height: 2268, url: 'blob:http://127.0.0.1:5178/0a7a9a77-ac13-4110-84b6...'}
+MultiDeviceMockup.tsx:307 ✅ Device 0 - Region updated: {hasImageUrl: true, hasImageNatural: true, imageNatural: {…}}
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:307 ✅ Device 0 - Region updated: {hasImageUrl: true, hasImageNatural: true, imageNatural: {…}}
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: false, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:402 Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+（匿名） @ MultiDeviceMockup.tsx:402
+drawMaskIntoOverlay @ MultiDeviceMockup.tsx:397
+（匿名） @ MultiDeviceMockup.tsx:781
+commitHookEffectListMount @ chunk-SVG7M4VJ.js?v=a13359cd:16961
+commitPassiveMountOnFiber @ chunk-SVG7M4VJ.js?v=a13359cd:18204
+commitPassiveMountEffects_complete @ chunk-SVG7M4VJ.js?v=a13359cd:18177
+commitPassiveMountEffects_begin @ chunk-SVG7M4VJ.js?v=a13359cd:18167
+commitPassiveMountEffects @ chunk-SVG7M4VJ.js?v=a13359cd:18157
+flushPassiveEffectsImpl @ chunk-SVG7M4VJ.js?v=a13359cd:19541
+flushPassiveEffects @ chunk-SVG7M4VJ.js?v=a13359cd:19498
+（匿名） @ chunk-SVG7M4VJ.js?v=a13359cd:19379
+workLoop @ chunk-SVG7M4VJ.js?v=a13359cd:195
+flushWork @ chunk-SVG7M4VJ.js?v=a13359cd:174
+performWorkUntilDeadline @ chunk-SVG7M4VJ.js?v=a13359cd:382
+MultiDeviceMockup.tsx:798 🔄 ==========  Composite useEffect triggered ==========
+MultiDeviceMockup.tsx:799 Device regions: (3) [{…}, {…}, {…}]
+MultiDeviceMockup.tsx:800 Debug mode: false
+MultiDeviceMockup.tsx:823 🔧 Processing Device 0: {hasImageUrl: true, hasHardMaskUrl: true, hasImageNatural: true, hasRect: true, imageUrl: 'blob:http://127.0.0.1:5178/0a7a9a77-ac13-4110-84b6-b5c9614c9001'}
+MultiDeviceMockup.tsx:835 📋 Device 0 Prerequisites Check: {last: true, hardMaskUrl: true, imageUrl: true, imageNatural: true, rect: true, …}
+MultiDeviceMockup.tsx:889 🖼️ Device 0: Loading images...
+MultiDeviceMockup.tsx:823 🔧 Processing Device 1: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 1 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 1: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:823 🔧 Processing Device 2: {hasImageUrl: false, hasHardMaskUrl: false, hasImageNatural: false, hasRect: false, imageUrl: null}
+MultiDeviceMockup.tsx:835 📋 Device 2 Prerequisites Check: {last: false, hardMaskUrl: false, imageUrl: false, imageNatural: false, rect: false, …}
+MultiDeviceMockup.tsx:846 ❌ Device 2: Missing prerequisites. Skipping.
+MultiDeviceMockup.tsx:893 ✅ Device 0: User image loaded {width: 4032, height: 2268, src: 'blob:http://127.0.0.1:5178/0a7a9a77-ac13-4110-84b6...'}
+MultiDeviceMockup.tsx:909 ✅ Device 0: Mask image loaded {width: 1559, height: 1377, src: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABhcA...'}
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:1892 🖼️ Rendering 0 device images
+MultiDeviceMockup.tsx:2027 [EnhancedDebug] state:props_changed {isVisible: true, debugMode: true, selectedDeviceIndex: null, deviceRegionsCount: 3, whiteMarginCount: 0, …}
+MultiDeviceMockup.tsx:970 🔍 Device 0: Extended area analysis {originalHeight: 202, expandedHeight: 262.6, expandedDeviceH: 1790.1000000000001, deviceAreaDataSize: '228x262'}
+MultiDeviceMockup.tsx:995 📷 Frame full image loaded for keyboard detection: {deviceIndex: 0, frameSize: '5376x3072', dataSize: '5376x3072'}
+deviceTypeDetection.ts:551 ⚠️ Not smartphone shape, skipping notch detection (aspect ratio: 0.87 )
+deviceTypeDetection.ts:221 Uncaught (in promise) ReferenceError: Cannot access 'checkStartY' before initialization
+    at detectKeyboardFromFrame (deviceTypeDetection.ts:221:24)
+    at detectDeviceTypeFromRegion (deviceTypeDetection.ts:136:19)
+    at MultiDeviceMockup.tsx:1004:39
+detectKeyboardFromFrame @ deviceTypeDetection.ts:221
+detectDeviceTypeFromRegion @ deviceTypeDetection.ts:136
+（匿名） @ MultiDeviceMockup.tsx:1004
+await in （匿名）
+（匿名） @ MultiDeviceMockup.tsx:1534
+（匿名） @ MultiDeviceMockup.tsx:814
+commitHookEffectListMount @ chunk-SVG7M4VJ.js?v=a13359cd:16961
+commitPassiveMountOnFiber @ chunk-SVG7M4VJ.js?v=a13359cd:18204
+commitPassiveMountEffects_complete @ chunk-SVG7M4VJ.js?v=a13359cd:18177
+commitPassiveMountEffects_begin @ chunk-SVG7M4VJ.js?v=a13359cd:18167
+commitPassiveMountEffects @ chunk-SVG7M4VJ.js?v=a13359cd:18157
+flushPassiveEffectsImpl @ chunk-SVG7M4VJ.js?v=a13359cd:19541
+flushPassiveEffects @ chunk-SVG7M4VJ.js?v=a13359cd:19498
+（匿名） @ chunk-SVG7M4VJ.js?v=a13359cd:19379
+workLoop @ chunk-SVG7M4VJ.js?v=a13359cd:195
+flushWork @ chunk-SVG7M4VJ.js?v=a13359cd:174
+performWorkUntilDeadline @ chunk-SVG7M4VJ.js?v=a13359cd:382
